@@ -1,18 +1,39 @@
-﻿using Microsoft.Xna.Framework;
+﻿/*
+ * Author: Shon Verch
+ * File Name: MainGame.cs
+ * Project Name: FreeCell
+ * Creation Date: 05/16/2019
+ * Modified Date: 05/16/2019
+ * Description: The core engine instance of the game that spawns all other entities
+ *              and simulates logic and rendering.
+ */
+
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace FreeCell
 {
     /// <summary>
-    /// This is the main type for your game.
+    /// The core engine instance of the game that spawns
+    /// all other entities and simulates logic and rendering.
     /// </summary>
-    public class Game1 : Game
+    public class MainGame : Game
     {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        /// <summary>
+        /// The width of the game window in pixels.
+        /// </summary>
+        public const int GameScreenWidth = 1193;
 
-        public Game1()
+        /// <summary>
+        /// The height of the game window in pixels.
+        /// </summary>
+        public const int GameScreenHeight = 671;
+
+        private readonly GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
+
+        public MainGame()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -26,9 +47,12 @@ namespace FreeCell
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             base.Initialize();
+
+            // Update the size of the game screen
+            graphics.PreferredBackBufferWidth = GameScreenWidth;
+            graphics.PreferredBackBufferHeight = GameScreenHeight;
+            graphics.ApplyChanges();
         }
 
         /// <summary>
