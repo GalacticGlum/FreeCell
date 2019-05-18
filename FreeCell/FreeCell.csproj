@@ -47,6 +47,8 @@
     <Compile Include="CardRank.cs" />
     <Compile Include="CardSuit.cs" />
     <Compile Include="Deck.cs" />
+    <Compile Include="GameScreen.cs" />
+    <Compile Include="GameScreenManager.cs" />
     <Compile Include="MainGame.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -8,9 +8,12 @@
  *              and simulates logic and rendering.
  */
 
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGameUtilities;
+using MonoGameUtilities.Logging;
 
 namespace FreeCell
 {
@@ -30,6 +33,11 @@ namespace FreeCell
         /// </summary>
         public const int GameScreenHeight = 671;
 
+        /// <summary>
+        /// The <see cref="FreeCell.GameScreenManager"/>.
+        /// </summary>
+        public GameScreenManager GameScreenManager { get; }
+
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
@@ -37,6 +45,8 @@ namespace FreeCell
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+
+            GameScreenManager = new GameScreenManager();
         }
 
         /// <summary>
@@ -53,6 +63,8 @@ namespace FreeCell
             graphics.PreferredBackBufferWidth = GameScreenWidth;
             graphics.PreferredBackBufferHeight = GameScreenHeight;
             graphics.ApplyChanges();
+
+            Logger.Destination = LoggerDestination.File;
         }
 
         /// <summary>
@@ -63,17 +75,7 @@ namespace FreeCell
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            // TODO: use this.Content to load your game content here
-        }
-
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// game-specific content.
-        /// </summary>
-        protected override void UnloadContent()
-        {
-            // TODO: Unload any non ContentManager content here
+            GameScreenManager.LoadContent(spriteBatch);
         }
 
         /// <summary>
@@ -83,12 +85,11 @@ namespace FreeCell
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            // We NEED to update input before we execute game logic
+            // so that the gameplay does not lag by a frame (due to not synchronized input).
+            Input.Update();
 
-            // TODO: Add your update logic here
-
-            base.Update(gameTime);
+            GameScreenManager.Update(gameTime);
         }
 
         /// <summary>
@@ -99,9 +100,20 @@ namespace FreeCell
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
+            GameScreenManager.Draw(gameTime);
+            spriteBatch.End();
+        }
 
-            base.Draw(gameTime);
+        /// <summary>
+        /// Called when the game is closing.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            // Write the logger buffer to the file system
+            Logger.FlushMessageBuffer();
         }
     }
 }
