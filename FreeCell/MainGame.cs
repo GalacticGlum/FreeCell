@@ -33,6 +33,11 @@ namespace FreeCell
         public const int GameScreenHeight = 671;
 
         /// <summary>
+        /// The current instance of this <see cref="MainGame"/>.
+        /// </summary>
+        public static MainGame Context { get; private set; }
+
+        /// <summary>
         /// The <see cref="FreeCell.GameScreenManager"/>.
         /// </summary>
         public GameScreenManager GameScreenManager { get; }
@@ -44,6 +49,7 @@ namespace FreeCell
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            Context = this;
 
             GameScreenManager = new GameScreenManager();
         }
@@ -75,6 +81,8 @@ namespace FreeCell
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             GameScreenManager.LoadContent(spriteBatch);
+
+            GameScreenManager.SwitchScreen<GameplayScreen>();
         }
 
         /// <summary>
@@ -87,7 +95,6 @@ namespace FreeCell
             // We NEED to update input before we execute game logic
             // so that the gameplay does not lag by a frame (due to not synchronized input).
             Input.Update();
-
             GameScreenManager.Update(gameTime);
         }
 
