@@ -1,0 +1,470 @@
+[
+    {
+        "name": "card_ca",
+        "rectangle": {
+            "X": 0,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_c2",
+        "rectangle": {
+            "X": 91,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_c3",
+        "rectangle": {
+            "X": 182,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_c4",
+        "rectangle": {
+            "X": 273,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_c5",
+        "rectangle": {
+            "X": 364,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_c6",
+        "rectangle": {
+            "X": 455,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_c7",
+        "rectangle": {
+            "X": 546,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_c8",
+        "rectangle": {
+            "X": 637,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_c9",
+        "rectangle": {
+            "X": 728,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_c10",
+        "rectangle": {
+            "X": 819,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_cj",
+        "rectangle": {
+            "X": 910,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_cq",
+        "rectangle": {
+            "X": 1001,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_ck",
+        "rectangle": {
+            "X": 1092,
+            "Y": 0,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_da",
+        "rectangle": {
+            "X": 0,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_d2",
+        "rectangle": {
+            "X": 91,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_d3",
+        "rectangle": {
+            "X": 182,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_d4",
+        "rectangle": {
+            "X": 273,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_d5",
+        "rectangle": {
+            "X": 364,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_d6",
+        "rectangle": {
+            "X": 455,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_d7",
+        "rectangle": {
+            "X": 546,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_d8",
+        "rectangle": {
+            "X": 637,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_d9",
+        "rectangle": {
+            "X": 728,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_d10",
+        "rectangle": {
+            "X": 819,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_dj",
+        "rectangle": {
+            "X": 910,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_dq",
+        "rectangle": {
+            "X": 1001,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_dk",
+        "rectangle": {
+            "X": 1092,
+            "Y": 128,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_ha",
+        "rectangle": {
+            "X": 0,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_h2",
+        "rectangle": {
+            "X": 91,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_h3",
+        "rectangle": {
+            "X": 182,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_h4",
+        "rectangle": {
+            "X": 273,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_h5",
+        "rectangle": {
+            "X": 364,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_h6",
+        "rectangle": {
+            "X": 455,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_h7",
+        "rectangle": {
+            "X": 546,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_h8",
+        "rectangle": {
+            "X": 637,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_h9",
+        "rectangle": {
+            "X": 728,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_h10",
+        "rectangle": {
+            "X": 819,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_hj",
+        "rectangle": {
+            "X": 910,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_hq",
+        "rectangle": {
+            "X": 1001,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_hk",
+        "rectangle": {
+            "X": 1092,
+            "Y": 256,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_sa",
+        "rectangle": {
+            "X": 0,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_s2",
+        "rectangle": {
+            "X": 91,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_s3",
+        "rectangle": {
+            "X": 182,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_s4",
+        "rectangle": {
+            "X": 273,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_s5",
+        "rectangle": {
+            "X": 364,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_s6",
+        "rectangle": {
+            "X": 455,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_s7",
+        "rectangle": {
+            "X": 546,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_s8",
+        "rectangle": {
+            "X": 637,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_s9",
+        "rectangle": {
+            "X": 728,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_s10",
+        "rectangle": {
+            "X": 819,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_sj",
+        "rectangle": {
+            "X": 910,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_sq",
+        "rectangle": {
+            "X": 1001,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    },
+    {
+        "name": "card_sk",
+        "rectangle": {
+            "X": 1092,
+            "Y": 384,
+            "Width": 91,
+            "Height": 128
+        }
+    }
+]
