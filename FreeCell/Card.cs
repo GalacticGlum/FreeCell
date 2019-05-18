@@ -7,6 +7,8 @@
  * Description: A singular playing card.
  */
 
+using System.Collections.Generic;
+
 namespace FreeCell
 {
     /// <summary>
@@ -14,6 +16,37 @@ namespace FreeCell
     /// </summary>
     public class Card
     {
+        /// <summary>
+        /// The identifier which represents the specific card suit when loading the card sprite.
+        /// </summary>
+        public static readonly Dictionary<CardSuit, string> CardSuitIdentifier = new Dictionary<CardSuit, string>
+        {
+            {CardSuit.Diamonds, "Diamonds"},
+            {CardSuit.Clubs, "Clubs"},
+            {CardSuit.Hearts, "Hearts"},
+            {CardSuit.Spades, "Spades"}
+        };
+
+        /// <summary>
+        /// The identifier which represents the specific card value when loading the card sprite.
+        /// </summary>
+        public static readonly Dictionary<CardRank, string> CardRankIdentifier = new Dictionary<CardRank, string>
+        {
+            {CardRank.Ace,  "A"},
+            {CardRank.Two,  "2"},
+            {CardRank.Three,  "3"},
+            {CardRank.Four,  "4"},
+            {CardRank.Five,  "5"},
+            {CardRank.Six,  "6"},
+            {CardRank.Seven,  "7"},
+            {CardRank.Eight,  "8"},
+            {CardRank.Nine,  "9"},
+            {CardRank.Ten,  "10"},
+            {CardRank.Jack,  "J"},
+            {CardRank.Queen,  "Q"},
+            {CardRank.King,  "K" }
+        };
+
         /// <summary>
         /// The <see cref="CardRank"/> of this <see cref="Card"/>.
         /// </summary>
@@ -51,5 +84,14 @@ namespace FreeCell
         /// </summary>
         /// <param name="index">The index of the card in the sorted deck.</param>
         public Card(int index) : this((CardRank)(index / 4 + 1), (CardSuit)(index % 4)) { }
+
+        /// <summary>
+        /// Gets the name of the card texture corresponding to the specified <see cref="CardSuit"/> and <see cref="CardRank"/>.
+        /// </summary>
+        /// <param name="suit">The <see cref="CardSuit"/>.</param>
+        /// <param name="rank">The <see cref="CardRank"/>.</param>
+        /// <returns>A <see cref="string"/> value representing the name of the card texture.</returns>
+        public static string GetTextureName(CardSuit suit, CardRank rank) =>
+            $"card{CardSuitIdentifier[suit]}{CardRankIdentifier[rank]}";
     }
 }

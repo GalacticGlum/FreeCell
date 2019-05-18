@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeCell", "FreeCell\FreeCell.csproj", "{EED60EAC-6912-4670-B0CA-CC135CCD86E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContentPipeline", "ContentPipeline\ContentPipeline.csproj", "{FA021089-EB67-4048-8A8E-FB7801F1D65E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,14 +19,6 @@ Global
 		{EED60EAC-6912-4670-B0CA-CC135CCD86E8}.Release|Any CPU.ActiveCfg = Release|x86
 		{EED60EAC-6912-4670-B0CA-CC135CCD86E8}.Release|x86.ActiveCfg = Release|x86
 		{EED60EAC-6912-4670-B0CA-CC135CCD86E8}.Release|x86.Build.0 = Release|x86
-		{FA021089-EB67-4048-8A8E-FB7801F1D65E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FA021089-EB67-4048-8A8E-FB7801F1D65E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FA021089-EB67-4048-8A8E-FB7801F1D65E}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FA021089-EB67-4048-8A8E-FB7801F1D65E}.Debug|x86.Build.0 = Debug|Any CPU
-		{FA021089-EB67-4048-8A8E-FB7801F1D65E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FA021089-EB67-4048-8A8E-FB7801F1D65E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FA021089-EB67-4048-8A8E-FB7801F1D65E}.Release|x86.ActiveCfg = Release|Any CPU
-		{FA021089-EB67-4048-8A8E-FB7801F1D65E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
