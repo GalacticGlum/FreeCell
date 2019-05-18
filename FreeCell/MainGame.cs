@@ -33,6 +33,9 @@ namespace FreeCell
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
+        /// <summary>
+        /// Initialize the <see cref="MainGame"/>.
+        /// </summary>
         public MainGame()
         {
             graphics = new GraphicsDeviceManager(this);
