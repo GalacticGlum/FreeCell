@@ -72,6 +72,7 @@ namespace FreeCell
             graphics.PreferredBackBufferHeight = GameScreenHeight;
             graphics.ApplyChanges();
 
+            IsMouseVisible = true;
             Logger.Destination = LoggerDestination.File;
         }
 

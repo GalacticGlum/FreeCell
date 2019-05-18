@@ -12,22 +12,27 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace FreeCell
 {
+    /// <inheritdoc />
     /// <summary>
-    /// The <see cref="GameScreen"/> containing all the gameplay.
+    /// The <see cref="FreeCell.GameScreen" /> containing all the gameplay.
     /// </summary>
     public class GameplayScreen : GameScreen
     {
         private Texture2D tableTexture;
+        private TextureAtlas cardTextureAtlas;
 
         public override void LoadContent(SpriteBatch spriteBatch)
         {
             base.LoadContent(spriteBatch);
+
+            cardTextureAtlas = new TextureAtlas("Cards", MainGame.Context.GraphicsDevice, MainGame.Context.Content);
             tableTexture = MainGame.Context.Content.Load<Texture2D>("Table");
         }
 
         public override void Draw(GameTime gameTime)
         {
             spriteBatch.Draw(tableTexture, Vector2.Zero, Color.White);
+            spriteBatch.Draw(cardTextureAtlas.Get("card_ca"), Vector2.One, Color.White);
         }
     }
 }

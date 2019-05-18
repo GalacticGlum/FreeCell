@@ -26,7 +26,6 @@ namespace FreeCell
     /// </summary>
     public struct TextureAtlasEntry
     {
-
         [JsonProperty("name", Required = Required.Always)]
         public string Name { get; set; }
 
