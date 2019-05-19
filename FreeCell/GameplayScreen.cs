@@ -118,7 +118,8 @@ namespace FreeCell
         /// </param>
         public GameplayScreen(int gameSeed)
         {
-            GameSeed = gameSeed;
+            //GameSeed = gameSeed;
+            GameSeed = 10;
         }
 
         public override void LoadContent(SpriteBatch spriteBatch)
@@ -331,15 +332,25 @@ namespace FreeCell
 
                     // If we have more cards than we can move, take the most that we can.
                     int transferAmount = Math.Min(selectedTableauPile.SelectedPortion.Count, maximumPortionLength);
+                    bool canTransfer = false;
 
-                    // The index of the last card in the portion that we are taking
-                    int bottomPortionCardIndex = selectedTableauPile.Count - transferAmount;
+                    // Check whether a part of the portion pile can be moved
+                    // For example, suppose that the portion consisted of 4 and 3 and
+                    // the user tried to move the pile onto a pile with a top card of 4.
+                    // The intended result is that only the 3 is moved.
+                    for (int i = selectedTableauPile.Count - transferAmount - 1; i < selectedTableauPile.Count; i++)
+                    {
+                        if (!tableauPile.CanPush(selectedTableauPile[i])) continue;
 
-                    Logger.Log(selectedTableauPile[bottomPortionCardIndex]);
+                        // Recalculate the transfer amount (subtract by the amount of times we traversed down the pile).
+                        transferAmount = selectedTableauPile.Count - i;
+                        canTransfer = true;
 
-                    // Make sure that we can move the portion (i.e. is it a valid move?)
-                    if (!tableauPile.CanPush(selectedTableauPile[bottomPortionCardIndex])) return false;
-                    
+                        break;
+                    }
+
+                    if (!canTransfer) return false;
+  
                     // A temporary "stack" buffer to store the cards as we pop them from the tableau pile
                     Card[] buffer = new Card[transferAmount];
                     for (int i = 0; i < transferAmount; i++)
