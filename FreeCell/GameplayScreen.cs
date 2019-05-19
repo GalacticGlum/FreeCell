@@ -60,6 +60,27 @@ namespace FreeCell
         public const int TableauPileVerticalPadding = 20;
 
         /// <summary>
+        /// The vertical padding, in pixels, between the tableau piles and the bottom of the screen.
+        /// </summary>
+        public const int TableauPileBottomPadding = 20;
+
+        /// <summary>
+        /// The percent of the <see cref="Card"/> texture height before
+        /// another <see cref="Card"/> overlaps in the <see cref="TableauPile"/>.
+        /// </summary>
+        public const float PercentPixelVisibility = 1 / 3f;
+
+        /// <summary>
+        /// The number of cards to maximally compress in a <see cref="TableauPile"/>.
+        /// </summary>
+        public const int CardCompressionGroupSize = 4;
+
+        /// <summary>
+        /// The percent factor by which the <see cref="Card"/> compress in on one another in the <see cref="TableauPile"/>.
+        /// </summary>
+        public const float PercentCardCompressionFactor = 0.02f;
+
+        /// <summary>
         /// The number of <see cref="FreeCell"/> piles.
         /// </summary>
         public const int FreeCellPileCount = 4;
@@ -222,14 +243,32 @@ namespace FreeCell
         }
 
         /// <summary>
+        /// The starting vertical position, in pixels, of the <see cref="TableauPile"/>s.
+        /// </summary>
+        private float GetTableauPileStartPositionY() => PileGroupPositionY + freeCellTexture.Height + TableauPileVerticalPadding;
+
+        /// <summary>
+        /// The size of a <see cref="Card"/>.
+        /// </summary>
+        /// <returns>
+        /// A two-dimensional vector with the x component represents the width of the <see cref="Card"/>
+        /// and the y component represents the height of the <see cref="Card"/>.
+        /// </returns>
+        private Vector2 GetCardSize()
+        {
+            // Choose an arbitrary card texture and use that to get the size
+            Texture2D cardTexture = cardTextures[new Tuple<CardSuit, CardRank>(CardSuit.Clubs, CardRank.Ace)];
+            return new Vector2(cardTexture.Width, cardTexture.Height);
+        }
+
+        /// <summary>
         /// Draw the <see cref="TableauPile"/>s.
         /// </summary>
         private void DrawTableauPiles()
         {
-            float positionY = PileGroupPositionY + freeCellTexture.Height + TableauPileVerticalPadding;
+            float positionY = GetTableauPileStartPositionY();
+            float cardTextureWidth = GetCardSize().X;
 
-            // Choose an arbitrary card texture and use that to get the width of the tableau pile (plus spacing).
-            float cardTextureWidth = cardTextures[new Tuple<CardSuit, CardRank>(CardSuit.Clubs, CardRank.Ace)].Width;
             // The width of all the tableau piles (including spacing).
             float fullWidth = cardTextureWidth * tableauPiles.Length + TableauPileHorizontalSpacing * (tableauPiles.Length - 1);
             // The amount of pixels to offset each tableau pixel such that they are horizontally centered.
@@ -240,8 +279,71 @@ namespace FreeCell
                 TableauPile tableauPile = tableauPiles[i];
                 float positionX = centreOffsetX + i * (cardTextureWidth + TableauPileHorizontalSpacing);
 
-                spriteBatch.Draw(cardTextures[new Tuple<CardSuit, CardRank>(CardSuit.Clubs, CardRank.Five)], new Vector2(positionX, positionY), Color.White);
+                float[] cardShifts = GetTableauPileCardLayout(tableauPile);
+
+                float offsetY = 0;
+                for (int j = 0; j < tableauPile.Count; j++)
+                {
+                    // Use the reverse index for the card shift since
+                    // the 0-th element represents the top-most card in the
+                    // shift array whereas the 0-th element in the card pile
+                    // is the bottom-most card.
+                    offsetY += cardShifts[tableauPile.Count - j - 1];
+
+                    Card card = tableauPile[j];
+                    spriteBatch.Draw(cardTextures[card.SuitRankTuple], new Vector2(positionX, positionY + offsetY), 
+                        null, Color.White, 0, Vector2.Zero, Vector2.One, SpriteEffects.None, j / (float) tableauPile.Count);
+                }
             }
+        }
+
+        /// <summary>
+        /// Get the card layout for a <see cref="TableauPile"/>.
+        /// </summary>
+        /// <param name="tableauPile">The <see cref="TableauPile"/>.</param>
+        /// <param name="focusCardIndex">The index of the <see cref="Card"/> that is focused. Zero is the top of the <see cref="TableauPile"/>.</param>
+        /// <returns>
+        /// An array of integers where the i-th integer denotes the vertical shift, in pixels, of the i-th card; the 0-th elements
+        /// represents the shift for the TOP-MOST card.
+        /// </returns>
+        private float[] GetTableauPileCardLayout(TableauPile tableauPile, int focusCardIndex = 0)
+        {
+            // The height of the tableau pile, in pixels. "Window" height is so called since it
+            // refers to the area available for the cards.
+            float windowHeight = MainGame.GameScreenHeight - GetTableauPileStartPositionY() - TableauPileBottomPadding;
+            float cardHeight = GetCardSize().Y;
+            float pixelVisibility = cardHeight * PercentPixelVisibility;
+
+            // The number of cards (including the first one) that can be fitted into the area without shrinking
+            // the pixel visibility for a group of cards.
+            int minimumCards = (int) Math.Ceiling((windowHeight - cardHeight) / pixelVisibility);
+            // The minimum pixel visibility when trying to fit all the cards in the tableau pile.
+            float minimumPixelVisibility = (windowHeight - cardHeight) / (tableauPile.MaximumSize - 1);
+
+            int excess = tableauPile.Count - minimumCards;
+            float compressionFactor = cardHeight * PercentCardCompressionFactor;
+            float compressionVisibility = Math.Max(pixelVisibility - excess * compressionFactor, minimumPixelVisibility);
+
+            // Distribute the leftover space among the non-compressed cards.
+            float leftoverVisibility = (windowHeight - cardHeight - compressionVisibility * CardCompressionGroupSize) / (tableauPile.Count - CardCompressionGroupSize - 1);
+
+            float[] allocations = new float[tableauPile.Count];
+            for (int i = 0; i < tableauPile.Count; i++)
+            {
+                // The bottom card has no shift since there is no card after it.
+                if (i == tableauPile.Count - 1) continue;
+
+                if (tableauPile.Count <= minimumCards)
+                {
+                    allocations[i] = pixelVisibility;
+                }
+                else
+                {
+                    allocations[i] = tableauPile.Count - 1 <= CardCompressionGroupSize ? compressionVisibility : leftoverVisibility;
+                }
+            }
+
+            return allocations;
         }
     }
 }

@@ -7,6 +7,7 @@
  * Description: A singular playing card.
  */
 
+using System;
 using System.Collections.Generic;
 
 namespace FreeCell
@@ -56,6 +57,11 @@ namespace FreeCell
         /// The <see cref="CardSuit"/> of this <see cref="Card"/>.
         /// </summary>
         public CardSuit Suit { get; }
+
+        /// <summary>
+        /// Get the (<see cref="CardSuit"/>, <see cref="CardRank"/>) pair for this <see cref="Card"/>.
+        /// </summary>
+        public Tuple<CardSuit, CardRank> SuitRankTuple => new Tuple<CardSuit, CardRank>(Suit, Rank);
 
         /// <summary>
         /// A boolean value indicating whether this <see cref="Card"/> is red: <value>true</value> if it is; <value>false</value> otherwise.

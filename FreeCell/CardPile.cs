@@ -25,9 +25,21 @@ namespace FreeCell
         public int MaximumSize { get; }
 
         /// <summary>
+        /// The number of <see cref="Card"/>s in this <see cref="CardPile"/>.
+        /// </summary>
+        public int Count => topIndex + 1;
+
+        /// <summary>
         /// A boolean value indicating whether this <see cref="CardPile"/> is empty.
         /// </summary>
         public bool Empty => topIndex < 0;
+
+        /// <summary>
+        /// Get the <see cref="Card"/> at the specified <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">The index of the <see cref="Card"/> in this <see cref="CardPile"/>.</param>
+        /// <returns>The <see cref="Card"/> at the specified <paramref name="index"/>.</returns>
+        public Card this[int index] => data[index];
 
         /// <summary>
         /// The data of this <see cref="CardPile"/>.
@@ -66,7 +78,7 @@ namespace FreeCell
         {
             if (topIndex < MaximumSize)
             {
-                if (!CanPush(card)) return false;
+                if (!CanPush(card) && !force) return false;
                 data[++topIndex] = card;
             }
 
