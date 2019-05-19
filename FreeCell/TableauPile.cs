@@ -3,11 +3,12 @@
  * File Name: TableauPile.cs
  * Project Name: FreeCell
  * Creation Date: 05/18/2019
- * Modified Date: 05/18/2019
+ * Modified Date: 05/19/2019
  * Description: The tableau card pile.
  */
 
 using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameUtilities;
@@ -62,9 +63,19 @@ namespace FreeCell
         }
 
         /// <summary>
-        /// Draw this <see cref="TableauPile"/>.
+        /// Called when a <see cref="Card"/> is a pushed onto this <see cref="TableauPile"/>.
         /// </summary>
-        public void Draw(SpriteBatch spriteBatch)
+        protected override void OnPushed(Card newCard) => CalculateCardRectangles();
+
+        /// <summary>
+        /// Called when a <see cref="Card"/> is popped onto this <see cref="TableauPile"/>.
+        /// </summary>
+        protected override void OnPopped(Card removedCard) => CalculateCardRectangles();
+
+        /// <summary>
+        /// Calculate the rectangle information for this <see cref="TableauPile"/>.
+        /// </summary>
+        private void CalculateCardRectangles()
         {
             float[] cardShifts = GetTableauPileCardLayout();
             float offsetY = 0;
@@ -78,10 +89,34 @@ namespace FreeCell
                 offsetY += cardShifts[Count - j - 1];
 
                 Card card = this[j];
-                float layerDepth = j / (float) Count;
+                Rectangle bounds = card.Texture.Bounds;
 
-                spriteBatch.Draw(Card.GetTexture(card.Suit, card.Rank), new Vector2(Rectangle.X, Rectangle.Y + offsetY),
-                    null, Color.White, 0, Vector2.Zero, Vector2.One, SpriteEffects.None, layerDepth);
+                card.Rectangle = new RectangleF(Rectangle.X, Rectangle.Y + offsetY, bounds.Width, bounds.Height);
+            }
+        }
+
+        /// <summary>
+        /// Draw this <see cref="TableauPile"/>.
+        /// </summary>
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            GameplayScreen gameplayScreen = MainGame.Context.GameScreenManager.Get<GameplayScreen>();
+
+            for (int j = 0; j < Count; j++)
+            {
+                Card card = this[j];
+
+                float layerDepth = j / (float) (Count + 100);
+
+                // Determine whether the card should glow.
+                bool isSelected = false;
+                if (gameplayScreen.CurrentSelection != null)
+                {
+                    // If this card is currently selected AND it is the top card, make it glow!
+                    isSelected = gameplayScreen.CurrentSelection.Card == card && j == Count - 1;
+                }
+                
+                card.Draw(spriteBatch, layerDepth, isSelected, layerDepth + 0.01f);
             }
         }
 
@@ -95,6 +130,7 @@ namespace FreeCell
         /// </returns>
         private float[] GetTableauPileCardLayout(int focusCardIndex = 0)
         {
+            // Choose an arbitrary card and g et its texture.
             float cardHeight = Card.GetTexture(CardSuit.Clubs, CardRank.Ace).Height;
             float pixelVisibility = cardHeight * PercentPixelVisibility;
 
@@ -127,6 +163,30 @@ namespace FreeCell
             }
 
             return allocations;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="Card"/> under the specified <paramref name="point"/>.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns>
+        /// The <see cref="Card"/> under the <paramref name="point"/> or <value>null</value> if the
+        /// none of the cards in this <see cref="TableauPile"/> contain the <paramref name="point"/>.
+        /// </returns>
+        public Card GetCardFromPoint(Vector2 point)
+        {
+            if (!Rectangle.Contains(point)) return null;
+
+            // Iterate through the cards from top to bottom
+            // so that we don't select a card that is behind another.
+            for (int i = Count - 1; i >= 0; i--)
+            {
+                Card card = this[i];
+                if (!card.Rectangle.HasValue || !card.Rectangle.Value.Contains(point)) continue;
+                return card;
+            }
+
+            return null;
         }
     }
 }

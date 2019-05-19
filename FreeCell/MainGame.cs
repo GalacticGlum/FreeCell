@@ -85,7 +85,6 @@ namespace FreeCell
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             GameScreenManager.LoadContent(spriteBatch);
-
             GameScreenManager.SwitchScreen<GameplayScreen>();
         }
 
@@ -110,7 +109,7 @@ namespace FreeCell
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
             GameScreenManager.Draw(gameTime);
             spriteBatch.End();
         }

@@ -3,7 +3,7 @@
  * File Name: GameplayScreen.cs
  * Project Name: FreeCell
  * Creation Date: 05/18/2019
- * Modified Date: 05/18/2019
+ * Modified Date: 05/19/2019
  * Description: The game screen containing all the gameplay.
  */
 
@@ -79,6 +79,14 @@ namespace FreeCell
         /// The current game seed.
         /// </summary>
         public int GameSeed { get; }
+
+        /// <summary>
+        /// Information about the current selection.
+        /// <remarks>
+        /// A <value>null</value> value indicates no selection.
+        /// </remarks>
+        /// </summary>
+        public CardSelectionInformation CurrentSelection { get; private set; }
 
         /// <summary>
         /// The texture of the table (background).
@@ -205,34 +213,30 @@ namespace FreeCell
         private void HandleCardSelection()
         {
             if (!Input.GetMouseButtonDown(MouseButton.Left)) return;
-           
+
+            // Check if we clicked on a card in a tableau pile
+            foreach (TableauPile tableauPile in tableauPiles)
+            {
+                Card card = tableauPile.GetCardFromPoint(Input.MousePosition);
+
+                // If the card is null, we didn't click on this tableau pile.
+                if (card == null) continue;
+
+                CurrentSelection = new CardSelectionInformation(card, tableauPile);
+                return;
+            }
+
             // Check if we clicked on a free cell
             foreach (FreeCell freeCell in freeCells)
             {
-                if (!freeCell.Rectangle.Contains(Input.MousePosition)) continue;
+                if (!freeCell.Rectangle.Contains(Input.MousePosition) || freeCell.Empty) continue;
 
-                Logger.LogFunctionEntry(string.Empty, "Clicked on free cell!");
+                CurrentSelection = new CardSelectionInformation(freeCell.Value, freeCell);
                 return;
             }
 
-            // Check if we clicked on a foundation pile
-            foreach (FoundationPile foundationPile in foundationPiles)
-            {
-                if (!foundationPile.Rectangle.Contains(Input.MousePosition)) continue;
-
-                Logger.LogFunctionEntry(string.Empty, "Clicked on foundation pile!");
-                return;
-            }
-
-            // Check if we clicked on a foundation pile
-            foreach (TableauPile tableauPile in tableauPiles)
-            {
-                if (!tableauPile.Rectangle.Contains(Input.MousePosition)) continue;
-
-                Logger.LogFunctionEntry(string.Empty, "Clicked on tableau pile!");
-                return;
-            }
-
+            // At this point, we are just clicking on an empty space.
+            CurrentSelection = null;
         }
 
         /// <summary>
