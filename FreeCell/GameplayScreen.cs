@@ -107,11 +107,6 @@ namespace FreeCell
         private Dictionary<Tuple<CardSuit, CardRank>, Texture2D> cardTextures;
 
         /// <summary>
-        /// A collection of all the <see cref="FoundationPile"/> textures mapped by <see cref="CardSuit"/>s.
-        /// </summary>
-        private Dictionary<CardSuit, Texture2D> foundationPileTextures;
-
-        /// <summary>
         /// The texture of a <see cref="FreeCell"/> pile.
         /// </summary>
         private Texture2D freeCellTexture;
@@ -143,18 +138,13 @@ namespace FreeCell
         {
             base.LoadContent(spriteBatch);
 
+            // Load texture
             tableTexture = MainGame.Context.Content.Load<Texture2D>("Table");
-
-            // Load the card and foundation pile textures
             cardTextures = new Dictionary<Tuple<CardSuit, CardRank>, Texture2D>();
-            foundationPileTextures = new Dictionary<CardSuit, Texture2D>();
             freeCellTexture = MainGame.Context.Content.Load<Texture2D>("Cards/freeCell");
 
             CardSuit[] cardSuits = Enum.GetValues(typeof(CardSuit)).Cast<CardSuit>().ToArray();
-
-            // One foundation pile per suit
             foundationPiles = new FoundationPile[cardSuits.Length]; 
-
             foreach (CardSuit suit in cardSuits)
             {
                 foreach (CardRank rank in Enum.GetValues(typeof(CardRank)).Cast<CardRank>())
@@ -163,16 +153,23 @@ namespace FreeCell
                     string cardTextureName = Card.GetTextureName(suit, rank);
                     cardTextures[new Tuple<CardSuit, CardRank>(suit, rank)] = MainGame.Context.Content.Load<Texture2D>($"Cards/{cardTextureName}");
                 }
-
-                // Resolve the name of the foundation pile texture for the current suit.
-                string foundationPileTextureName = $"Cards/foundation{Card.CardSuitIdentifier[suit]}";
-                foundationPileTextures[suit] = MainGame.Context.Content.Load<Texture2D>(foundationPileTextureName);
             }
 
             // Initialize the foundation piles.
             for (int i = 0; i < cardSuits.Length; i++)
             {
-                foundationPiles[i] = new FoundationPile(cardSuits[i]);
+                Texture2D pileTexture = FoundationPile.GetTexture(cardSuits[i]);
+
+                // We use the reverse index since we are positioning
+                // the foundation piles from the right of the screen.
+                int reverseIndex = foundationPiles.Length - i - 1;
+
+                // Foundation piles are placed from the right of the screen.
+                // We find the total space from the current card to the final card and then apply the horizontal padding to the right side.
+                float totalSapceFromCurrent = pileTexture.Width * (reverseIndex + 1) + PileHorizontalSpacing * reverseIndex + PileGroupHorizontalPadding;
+                float positionX = MainGame.GameScreenWidth - totalSapceFromCurrent;
+
+                foundationPiles[i] = new FoundationPile(cardSuits[i], new RectangleF(positionX, PileGroupPositionY, pileTexture.Width, pileTexture.Height));
             }
 
             // Initialize the free cells
@@ -184,17 +181,18 @@ namespace FreeCell
                 freeCells[i] = new FreeCell(new RectangleF(positionX, PileGroupPositionY, freeCellTexture.Width, freeCellTexture.Height));
             }
 
-            // Initialize the deck and tableau piles
+            // Initialize the deck
             deck = new Deck();
             deck.Shuffle(GameSeed);
 
-            // Populate the tableau piles
+            // Initialize the tableau piles
             tableauPiles = new TableauPile[TableauPileCount];
             for (int i = 0; i < tableauPiles.Length; i++)
             {
                 tableauPiles[i] = new TableauPile();
             }
 
+            // Populate the tableau piles
             for (int i = 0; i < deck.Count; i++)
             {
                 tableauPiles[i % tableauPiles.Length].Push(deck[i], true);
@@ -216,9 +214,9 @@ namespace FreeCell
         /// </summary>
         private void DrawFreeCells()
         {
-            for (int i = 0; i < freeCells.Length; i++)
+            foreach (FreeCell freeCell in freeCells)
             {
-                freeCells[i].Draw(spriteBatch);
+                freeCell.Draw(spriteBatch);
             }
         }
 
@@ -227,19 +225,9 @@ namespace FreeCell
         /// </summary>
         private void DrawFoundationPiles()
         {
-            for (int i = 0; i < foundationPiles.Length; i++)
+            foreach (FoundationPile foundationPile in foundationPiles)
             {
-                FoundationPile foundationPile = foundationPiles[i];
-                Texture2D pileTexture = foundationPileTextures[foundationPile.Suit];
-
-                // We use the reverse index since we are positioning
-                // the foundation piles from the right of the screen.
-                int reverseIndex = foundationPiles.Length - i - 1;
-
-                // Foundation piles are placed from the right of the screen.
-                // We find the total space from the current card to the final card and then apply the horizontal padding to the right side.
-                float positionX = MainGame.GameScreenWidth - (pileTexture.Width * (reverseIndex + 1) + PileHorizontalSpacing * reverseIndex + PileGroupHorizontalPadding);
-                spriteBatch.Draw(pileTexture, new Vector2(positionX, PileGroupPositionY), Color.White);
+                foundationPile.Draw(spriteBatch);
             }
         }
 
