@@ -80,6 +80,8 @@ namespace FreeCell
             {
                 if (!CanPush(card) && !force) return false;
                 data[++topIndex] = card;
+
+                OnPushed(card);
             }
 
             Logger.LogFunctionEntry(string.Empty, "Attempted to push card onto full card pile.", LoggerVerbosity.Warning);
@@ -95,6 +97,18 @@ namespace FreeCell
         protected virtual bool CanPush(Card card) => true;
 
         /// <summary>
+        /// Called when a <see cref="Card"/> is pushed onto this <see cref="CardPile"/>.
+        /// </summary>
+        /// <param name="newCard"></param>
+        protected virtual void OnPushed(Card newCard) { }
+
+        /// <summary>
+        /// Called when a <see cref="Card"/> is popped from this <see cref="CardPile"/>.
+        /// </summary>
+        /// <param name="removedCard"></param>
+        protected virtual void OnPopped(Card removedCard) { }
+
+        /// <summary>
         /// Pops a <see cref="Card"/> from this <see cref="CardPile"/>.
         /// </summary>
         /// <returns>
@@ -103,7 +117,13 @@ namespace FreeCell
         /// </returns>
         public Card Pop()
         {
-            if (topIndex >= 0) return data[topIndex--];
+            if (topIndex >= 0)
+            {
+                Card card = data[topIndex--];
+                OnPopped(card);
+
+                return card;
+            }
 
             Logger.LogFunctionEntry(string.Empty, "Attempted to pop card from empty card pile.", LoggerVerbosity.Warning);
             return null;

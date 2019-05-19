@@ -9,6 +9,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace FreeCell
 {
@@ -59,11 +60,6 @@ namespace FreeCell
         public CardSuit Suit { get; }
 
         /// <summary>
-        /// Get the (<see cref="CardSuit"/>, <see cref="CardRank"/>) pair for this <see cref="Card"/>.
-        /// </summary>
-        public Tuple<CardSuit, CardRank> SuitRankTuple => new Tuple<CardSuit, CardRank>(Suit, Rank);
-
-        /// <summary>
         /// A boolean value indicating whether this <see cref="Card"/> is red: <value>true</value> if it is; <value>false</value> otherwise.
         /// </summary>
         public bool IsRed => Suit == CardSuit.Diamonds || Suit == CardSuit.Hearts;
@@ -99,5 +95,14 @@ namespace FreeCell
         /// <returns>A <see cref="string"/> value representing the name of the card texture.</returns>
         public static string GetTextureName(CardSuit suit, CardRank rank) =>
             $"card{CardSuitIdentifier[suit]}{CardRankIdentifier[rank]}";
+
+        /// <summary>
+        /// Gets the card texture corresponding to the specified <see cref="CardSuit"/> and <see cref="CardRank"/>.
+        /// </summary>
+        /// <param name="suit">The <see cref="CardSuit"/>.</param>
+        /// <param name="rank">The <see cref="CardRank"/>.</param>
+        /// <returns>A <see cref="Texture2D"/> value representing the card texture.</returns>
+        public static Texture2D GetTexture(CardSuit suit, CardRank rank) =>
+            MainGame.Context.Content.Load<Texture2D>($"Cards/{GetTextureName(suit, rank)}");
     }
 }
