@@ -22,12 +22,12 @@ namespace FreeCell
         /// <summary>
         /// The maximum game seed for the shuffling algorithm.
         /// </summary>
-        private const int MaximumGameSeed = 32000;
+        public const int MaximumGameSeed = 32000;
 
         /// <summary>
         /// The minimum game seed for the shuffling algorithm.
         /// </summary>
-        private const int MinimumGameSeed = 1;
+        public const int MinimumGameSeed = 1;
 
         /// <summary>
         /// The cards of this <see cref="Deck"/>.
@@ -38,6 +38,21 @@ namespace FreeCell
         /// The game seed used to shuffle this <see cref="Deck"/>.
         /// </summary>
         public int Seed { get; private set; }
+
+        /// <summary>
+        /// The number of <see cref="Card"/>s in this <see cref="Deck"/>.
+        /// </summary>
+        public int Count => cards.Length;
+
+        /// <summary>
+        /// Gets/sets the <see cref="Card"/> at the specified <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">The index in this <see cref="Deck"/>.</param>
+        public Card this[int index]
+        {
+            get => cards[index];
+            set => cards[index] = value;
+        }
 
         /// <summary>
         /// Initialize a new <see cref="Deck"/> in a pre-shuffled state.
@@ -82,16 +97,11 @@ namespace FreeCell
                 int index = cardRandomEngine.Next() % swapIndex;
 
                 cardBuffer[i] = cards[index];
-                cards[index] = cards[swapIndex];
+                cards[index] = cards[swapIndex - 1];
             }
 
             cards = cardBuffer;
         }
-
-        /// <summary>
-        /// Shuffle this <see cref="Deck"/>.
-        /// </summary>
-        public void Shuffle() => Shuffle(Random.Range(MinimumGameSeed, MaximumGameSeed + 1));
 
         /// <summary>
         /// Retrieve the <see cref="IEnumerator{T}"/> for this <see cref="Deck"/> which iterates over the stored <see cref="Card"/> collection.

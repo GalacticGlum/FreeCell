@@ -7,6 +7,9 @@
  * Description: The base card pile.
  */
 
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using MonoGameUtilities.Logging;
 
 namespace FreeCell
@@ -14,7 +17,7 @@ namespace FreeCell
     /// <summary>
     /// The base card pile.
     /// </summary>
-    public abstract class CardPile
+    public abstract class CardPile : IEnumerable<Card>
     {
         /// <summary>
         /// The maximum size of this <see cref="CardPile"/>.
@@ -52,11 +55,14 @@ namespace FreeCell
         /// Pushes the specified <paramref name="card"/> onto this <see cref="CardPile"/>.
         /// </summary>
         /// <param name="card">The <see cref="Card"/> to push.</param>
+        /// <param name="force">
+        /// Ignores <see cref="CanPush"/> and always pushes the <see cref="Card"/>. Defaults to <value>false</value>.
+        /// </param>
         /// <returns>
         /// A boolean value indicating whether the <paramref name="card"/> was successfully
         /// pushed onto this <see cref="CardPile"/>.
         /// </returns>
-        public bool Push(Card card)
+        public bool Push(Card card, bool force = false)
         {
             if (topIndex < MaximumSize)
             {
@@ -99,5 +105,15 @@ namespace FreeCell
         /// If the <see cref="CardPile"/> is empty, a value of <value>null</value> is returned.
         /// </returns>
         public Card Peek() => topIndex < 0 ? null : data[topIndex];
+
+        /// <summary>
+        /// Retrieve the <see cref="IEnumerator{T}"/> for this <see cref="CardPile"/> which iterates over the stored <see cref="Card"/> collection.
+        /// </summary>
+        public IEnumerator<Card> GetEnumerator() => data.Take(topIndex).GetEnumerator();
+
+        /// <summary>
+        /// Retrieve the <see cref="IEnumerator{T}"/> for this <see cref="Deck"/> which iterates over the stored <see cref="Card"/> collection.
+        /// </summary>
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

@@ -89,7 +89,9 @@ namespace FreeCell
         /// </remarks>
         /// </summary>
         /// <typeparam name="T">The <see cref="Type"/> of the <see cref="GameScreen"/>.</typeparam>
-        public void ReloadScreen<T>() where T : GameScreen => ReloadScreen(typeof(T));
+        /// <param name="constructorArgs">The arguments passed to the constructor of the <see cref="GameScreen"/> of type <typeparamref name="T"/>.</param>
+
+        public void ReloadScreen<T>(params object[] constructorArgs) where T : GameScreen => ReloadScreen(typeof(T), constructorArgs);
 
         /// <summary>
         /// Reload a <see cref="GameScreen"/> of the specified <paramref name="type"/>.
@@ -99,7 +101,8 @@ namespace FreeCell
         /// </remarks>
         /// </summary>
         /// <param name="type">The <see cref="Type"/> of the <see cref="GameScreen"/> to reload.</param>
-        public void ReloadScreen(Type type)
+        /// <param name="constructorArgs">The arguments passed to the constructor of the <see cref="GameScreen"/> of <paramref name="type"/>.</param>
+        public void ReloadScreen(Type type, params object[] constructorArgs)
         {
             if (!gameScreens.ContainsKey(type))
             {
@@ -107,7 +110,7 @@ namespace FreeCell
                 return;
             }
 
-            gameScreens[type] = (GameScreen) Activator.CreateInstance(type);
+            gameScreens[type] = (GameScreen) Activator.CreateInstance(type, constructorArgs);
             gameScreens[type].LoadContent(spriteBatch);
         }
 

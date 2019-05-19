@@ -23,6 +23,19 @@ namespace FreeCell
         protected SpriteBatch spriteBatch;
 
         /// <summary>
+        /// Initializes a new <see cref="GameScreen"/>.
+        /// <remarks>
+        /// <par>
+        /// Every <see cref="GameScreen"/> MUST have a parameterless constructor
+        /// so that the <see cref="GameScreenManager"/> can instantiate it.
+        /// </par>
+        /// A <see cref="GameScreen"/> can have additional constructors with
+        /// parameters (which are invoked when a <see cref="GameScreen"/> is reloaded).
+        /// </remarks>
+        /// </summary>
+        public GameScreen() { }
+
+        /// <summary>
         /// Called once per game and is the place to load all content for this <see cref="GameScreen"/>.
         /// </summary>
         /// <param name="spriteBatch">The <see cref="SpriteBatch"/> instance.</param>
