@@ -60,6 +60,7 @@
     <Compile Include="CardRandomEngine.cs" />
     <Compile Include="CardSelectionInformation.cs" />
     <Compile Include="TableauPile.cs" />
+    <Compile Include="TextButton.cs" />
     <Compile Include="TimingHelper.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameUtilities;
 using MonoGameUtilities.Logging;
+using SpaceInvaders;
 using Random = MonoGameUtilities.Random;
 
 namespace FreeCell
@@ -86,6 +87,11 @@ namespace FreeCell
         private static readonly Color UIBarColour = new Color(0, 0, 0, 0.4f);
 
         /// <summary>
+        /// The colour when something is hovered over.
+        /// </summary>
+        private static readonly Color ButtonHoverColour = new Color(255, 251, 153);
+
+        /// <summary>
         /// The current game seed.
         /// </summary>
         public int GameSeed { get; }
@@ -114,6 +120,7 @@ namespace FreeCell
         private FoundationPile[] foundationPiles;
         private TableauPile[] tableauPiles;
 
+        private TextButton newGameButton;
 
         /// <summary>
         /// The elapsed time, in seconds, since the start of the game.
@@ -222,6 +229,8 @@ namespace FreeCell
         /// <param name="gameTime"></param>
         public override void Update(GameTime gameTime)
         {
+            UpdateUI();
+
             gameElapsedTime += (float) gameTime.ElapsedGameTime.TotalSeconds;
 
             if (HandleCardMovement()) return;
@@ -456,6 +465,14 @@ namespace FreeCell
         }
 
         /// <summary>
+        /// Update the UI.
+        /// </summary>
+        private void UpdateUI()
+        {
+            newGameButton?.Update();
+        }
+
+        /// <summary>
         /// Draw the UI.
         /// </summary>
         private void DrawUI()
@@ -468,7 +485,8 @@ namespace FreeCell
             spriteBatch.DrawLine(new Vector2(0, lineY), new Vector2(MainGame.GameScreenWidth, lineY), UIBarColour, TopUIBarHeight);
 
             // Draw the timer
-            string timerText = $"time {TimingHelper.ElapsedSecondsToTimerString(gameElapsedTime)}";
+            string timerText = TimingHelper.ElapsedSecondsToTimerString(gameElapsedTime);
+
             // Horizontally centre the text on the screen and centre it in the bar.
             Vector2 timerStringSize = headerFont.MeasureString(timerText);
             Vector2 timerTextPosition = (new Vector2(MainGame.GameScreenWidth, TopUIBarHeight) - timerStringSize) * 0.5f;
@@ -484,6 +502,22 @@ namespace FreeCell
                 (TopUIBarHeight - gameNumberStringSize.Y) * 0.5f);
 
             spriteBatch.DrawString(headerFont, gameNumberText, gameNumberTextPosition, Color.White);
+
+            // Draw the new game button
+            const string newGameButtonText = "New Game";
+            if (newGameButton == null)
+            {
+                float newGameButtonY = (TopUIBarHeight - headerFont.MeasureString(newGameButtonText).Y) * 0.5f;
+
+                // Initialize the new game button
+                newGameButton = new TextButton(new Vector2(0, 0), headerFont, newGameButtonText, new Vector2(TextScreenPadding, newGameButtonY))
+                {
+                    RegularTextColour = Color.White,
+                    HoverTextColour = ButtonHoverColour
+                };
+            }
+
+            newGameButton?.Draw(spriteBatch);
         }
 
         /// <summary>
