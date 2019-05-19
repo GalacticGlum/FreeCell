@@ -338,7 +338,7 @@ namespace FreeCell
                     // For example, suppose that the portion consisted of 4 and 3 and
                     // the user tried to move the pile onto a pile with a top card of 4.
                     // The intended result is that only the 3 is moved.
-                    for (int i = selectedTableauPile.Count - transferAmount - 1; i < selectedTableauPile.Count; i++)
+                    for (int i = selectedTableauPile.Count - transferAmount; i < selectedTableauPile.Count; i++)
                     {
                         if (!tableauPile.CanPush(selectedTableauPile[i])) continue;
 
