@@ -8,7 +8,7 @@
  */
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameUtilities;
@@ -36,6 +36,11 @@ namespace FreeCell
         /// The percent factor by which the <see cref="Card"/> compress in on one another in the <see cref="TableauPile"/>.
         /// </summary>
         public const float PercentCardCompressionFactor = 0.05f;
+
+        /// <summary>
+        /// The selection portion of cards.
+        /// </summary>
+        public HashSet<Card> SelectedPortion { get; private set; }
 
         /// <summary>
         /// The height, in pixels, of the tableau area available to cards.
@@ -68,7 +73,7 @@ namespace FreeCell
 
             // A card can be moved onto the tableau pile if it is the opposite colour as 
             // the top card AND it is one less in rank than the top card.
-            return !card.IsRed == top.IsRed && (int) top.Rank - 1 == (int) card.Rank;
+            return card.IsRed != top.IsRed && (int) top.Rank - 1 == (int) card.Rank;
         }
 
         /// <summary>
@@ -82,9 +87,28 @@ namespace FreeCell
         protected override void OnPopped(Card removedCard) => CalculateCardRectangles();
 
         /// <summary>
+        /// Update this <see cref="TableauPile"/> after the selection has changed.
+        /// </summary>
+        /// <param name="isSelected">A boolean indicating whether this <see cref="TableauPile"/> is currently selected.</param>
+        public void UpdateSelection(bool isSelected)
+        {
+            CalculateCardRectangles();
+
+            if (isSelected)
+            {
+                GameplayScreen gameplayScreen = MainGame.Context.GameScreenManager.Get<GameplayScreen>();
+                SelectedPortion = FindPortion(gameplayScreen.CurrentSelection.Card);
+            }
+            else
+            {
+                SelectedPortion = null;
+            }
+        }
+
+        /// <summary>
         /// Calculate the rectangle information for this <see cref="TableauPile"/>.
         /// </summary>
-        public void CalculateCardRectangles()
+        private void CalculateCardRectangles()
         {
             float[] cardShifts = GetTableauPileCardLayout();
             float offsetY = 0;
@@ -136,6 +160,7 @@ namespace FreeCell
         public void Draw(SpriteBatch spriteBatch)
         {
             GameplayScreen gameplayScreen = MainGame.Context.GameScreenManager.Get<GameplayScreen>();
+
             for (int j = 0; j < Count; j++)
             {
                 Card card = this[j];
@@ -148,15 +173,66 @@ namespace FreeCell
                     isSelected = gameplayScreen.CurrentSelection.Card == card;
                 }
 
+                bool isPileSelected = gameplayScreen.CurrentSelection?.CardPile == this;
+                bool isPortionCard = SelectedPortion != null && SelectedPortion.Contains(card) && isPileSelected;
+
                 // If this card is currently selected AND it is the top card, make it glow!
-                bool isGlowing = isSelected && j == Count - 1;
-                // The card is grayed out if it is not selected BUT this tableau pile IS selected.
-                bool isGrayedOut = !isSelected && gameplayScreen.CurrentSelection?.CardPile == this;
+                // bool isGlowing = isSelected && j == Count - 1;
+
+                // If this card is part of a portion that extends to the top of the pile, make it glow!
+                // (i.e. if the portion contains the top card, it extends to the top. This is guaranteed to work
+                // since a portion is a continuous subset of the pile.)
+                bool isGlowing = isPortionCard && SelectedPortion.Contains(Peek());
+
+                // The card is grayed out if it is not selected BUT this tableau pile IS selected AND it isn't part of a portion.
+                bool isGrayedOut = isPileSelected && !isPortionCard;
 
                 card.Draw(spriteBatch, layerDepth, isGlowing, layerDepth + 0.01f, isGrayedOut);
             }
         }
 
+        /// <summary>
+        /// Find a portion in this <see cref="TableauPile"/> containing the specified <paramref name="card"/>.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="HashSet{T}"/> of <see cref="Card"/>s that make up the portion. If no such portion
+        /// of cards exists, the set simply contains the specified card.
+        /// </returns>
+        public HashSet<Card> FindPortion(Card card)
+        {
+            int index = GetIndexOf(card);
+
+            // Could not find the card in the tableau pile
+            if (index == -1) return null;
+
+            HashSet<Card> portion = new HashSet<Card>
+            {
+                card
+            };
+
+            // Search down the pile (towards the bottom) for any cards
+            for (int i = index - 1; i >= 0; i--)
+            {
+                Card current = this[i];
+                Card previous = this[i + 1];
+
+                if (current.IsRed == previous.IsRed || (int) current.Rank - 1 != (int) previous.Rank) break;
+                portion.Add(current);
+            }        
+
+            // Search up the pile (towards the top) for any cards
+            for (int i = index + 1; i < Count; i++)
+            {
+                Card current = this[i];
+                Card previous = this[i - 1];
+
+                if (current.IsRed == previous.IsRed || (int)current.Rank + 1 != (int)previous.Rank) break;
+                portion.Add(current);
+            }
+            
+
+            return portion;
+        }
         /// <summary>
         /// Get the card layout for a <see cref="TableauPile"/>.
         /// </summary>

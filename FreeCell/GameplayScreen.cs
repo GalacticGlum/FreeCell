@@ -12,7 +12,6 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameUtilities;
-using MonoGameUtilities.Logging;
 using Random = MonoGameUtilities.Random;
 
 namespace FreeCell
@@ -106,7 +105,7 @@ namespace FreeCell
         /// <summary>
         /// Initializes a new <see cref="GameplayScreen"/>.
         /// </summary>
-        public GameplayScreen() : this(10) { }
+        public GameplayScreen() : this(Random.Range(Deck.MinimumGameSeed, Deck.MaximumGameSeed + 1)) { }
 
         /// <summary>
         /// Initializes a new <see cref="GameplayScreen"/> with the specified <paramref name="gameSeed"/>.
@@ -118,7 +117,8 @@ namespace FreeCell
         /// </param>
         public GameplayScreen(int gameSeed)
         {
-            GameSeed = gameSeed;
+            //GameSeed = gameSeed;
+            GameSeed = 10;
         }
 
         public override void LoadContent(SpriteBatch spriteBatch)
@@ -184,7 +184,7 @@ namespace FreeCell
 
             // The width of all the tableau piles (including spacing).
             float fullWidth = cardTextureWidth * tableauPiles.Length + TableauPileHorizontalSpacing * (tableauPiles.Length - 1);
-            // The amount of pixels to offset each tableau pixel such that they are horizontally centered.
+            // The amount of pixels to offset each tableau pile such that they are horizontally centered.
             float centreOffsetX = 0.5f * (MainGame.GameScreenWidth - fullWidth);
 
             for (int i = 0; i < tableauPiles.Length; i++)
@@ -220,6 +220,20 @@ namespace FreeCell
         {
             if (!Input.GetMouseButtonDown(MouseButton.Left)) return;
 
+            // A card is a "middle tableau" if it is not the top card.
+            bool isMiddleTableauCardSelected = false;
+            bool isMiddleTableauPortionSelected = false;
+
+            TableauPile selectedTableauPile = null;
+            if (CurrentSelection?.CardPile is TableauPile)
+            {
+                selectedTableauPile = (TableauPile) CurrentSelection.CardPile;
+
+                isMiddleTableauCardSelected = CurrentSelection.Card != CurrentSelection.CardPile.Peek();
+                isMiddleTableauPortionSelected = selectedTableauPile.SelectedPortion.Contains(CurrentSelection.Card) && 
+                                                 !selectedTableauPile.SelectedPortion.Contains(selectedTableauPile.Peek());
+            }
+
             // Check if we clicked on a card in a tableau pile
             foreach (TableauPile tableauPile in tableauPiles)
             {
@@ -227,7 +241,24 @@ namespace FreeCell
 
                 // If the card is null, we didn't click on this tableau pile.
                 if (card == null) continue;
+ 
+                bool selectedPortionCard = false;
+                if (selectedTableauPile != null)
+                {
+                    selectedPortionCard = selectedTableauPile.SelectedPortion.Contains(card);
+                }
 
+                // If we have a "middle tableau" card selected and we clicked on it again, let's deselect it.
+                // OR if our "middle" tableau card is in a portion and we select another card in that portion
+                // (i.e. we treat portions in the middle of a tableau pile as one card in terms of selection).
+                if (isMiddleTableauCardSelected && card == CurrentSelection.Card || isMiddleTableauPortionSelected && selectedPortionCard)
+                {
+                    CurrentSelection = null;
+                    return;
+                }
+                
+                // If we were previously selecting a tableau pile, cache it
+                // so we can update it.
                 TableauPile oldTableauPile = null;
                 if (CurrentSelection?.CardPile is TableauPile pile)
                 {
@@ -235,14 +266,12 @@ namespace FreeCell
                 }
 
                 CurrentSelection = new CardSelectionInformation(card, tableauPile);
-                oldTableauPile?.CalculateCardRectangles();
-                tableauPile.CalculateCardRectangles();
+                
+                oldTableauPile?.UpdateSelection(tableauPile == oldTableauPile);
+                tableauPile.UpdateSelection(true);
 
                 return;
             }
-
-            // A card is a "middle tableau" if it is not the top card.
-            bool isMiddleTableauCardSelected = CurrentSelection?.CardPile is TableauPile && CurrentSelection.Card != CurrentSelection.CardPile.Peek();
 
             // Check if we clicked on a free cell
             foreach (FreeCell freeCell in freeCells)

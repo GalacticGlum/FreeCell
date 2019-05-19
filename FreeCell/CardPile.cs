@@ -7,6 +7,7 @@
  * Description: The base card pile.
  */
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -154,6 +155,14 @@ namespace FreeCell
         /// <param name="point">The <see cref="Vector2"/> to check.</param>
         /// <returns>A boolean value indicating whether the <paramref name="point"/> is contained in this <see cref="CardPile"/>.</returns>
         public bool Contains(Vector2 point) => Rectangle.Contains(point);
+
+        /// <summary>
+        /// Finds the index of a the specified <paramref name="card"/> in this <see cref="CardPile"/>.
+        /// </summary>
+        /// <param name="card">The <see cref="Card"/> to find.</param>
+        /// <returns>The index of the <paramref name="card"/> in this <see cref="CardPile"/> or <value>-1</value> if it could not be found.</returns>
+        protected int GetIndexOf(Card card) => Array.IndexOf(data, card);
+
 
         /// <summary>
         /// Retrieve the <see cref="IEnumerator{T}"/> for this <see cref="CardPile"/> which iterates over the stored <see cref="Card"/> collection.
