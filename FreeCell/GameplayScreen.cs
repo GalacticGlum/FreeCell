@@ -27,7 +27,7 @@ namespace FreeCell
         /// The vertical padding, in pixels, from the top of the screen which
         /// is allocated for UI elements.
         /// </summary>
-        public const float TopVerticalBoundary = MainGame.GameScreenHeight * 0.08f;
+        public const float TopUIBarHeight = MainGame.GameScreenHeight * 0.08f;
 
         /// <summary>
         /// The horizontal padding, in pixels, before the free cell/foundation piles.
@@ -48,7 +48,7 @@ namespace FreeCell
         /// <summary>
         /// The vertical position of the pile group.
         /// </summary>
-        public const float PileGroupPositionY = TopVerticalBoundary + PileGroupVerticalPadding;
+        public const float PileGroupPositionY = TopUIBarHeight + PileGroupVerticalPadding;
 
         /// <summary>
         /// The padding, in pixels, between adjacent tableau piles.
@@ -76,6 +76,16 @@ namespace FreeCell
         public const int TableauPileCount = 8;
 
         /// <summary>
+        /// The horizontal padding, in pixels, between text and the edge of the screen.
+        /// </summary>
+        public const int TextScreenPadding = 20;
+
+        /// <summary>
+        /// The colour of the top ui bar.
+        /// </summary>
+        private static readonly Color UIBarColour = new Color(0, 0, 0, 0.4f);
+
+        /// <summary>
         /// The current game seed.
         /// </summary>
         public int GameSeed { get; }
@@ -97,11 +107,18 @@ namespace FreeCell
         /// The texture of a <see cref="FreeCell"/> pile.
         /// </summary>
         private Texture2D freeCellTexture;
+        private SpriteFont headerFont;
 
         private Deck deck;
         private FreeCell[] freeCells;
         private FoundationPile[] foundationPiles;
         private TableauPile[] tableauPiles;
+
+
+        /// <summary>
+        /// The elapsed time, in seconds, since the start of the game.
+        /// </summary>
+        private float gameElapsedTime;
 
         /// <summary>
         /// Initializes a new <see cref="GameplayScreen"/>.
@@ -126,9 +143,10 @@ namespace FreeCell
         {
             base.LoadContent(spriteBatch);
 
-            // Load texture
+            // Load content
             tableTexture = MainGame.Context.Content.Load<Texture2D>("Table");
             freeCellTexture = MainGame.Context.Content.Load<Texture2D>("Cards/freeCell");
+            headerFont = MainGame.Context.Content.Load<SpriteFont>("Fonts/Arial_24");
 
             CardSuit[] cardSuits = Enum.GetValues(typeof(CardSuit)).Cast<CardSuit>().ToArray();
             foundationPiles = new FoundationPile[cardSuits.Length];
@@ -204,6 +222,8 @@ namespace FreeCell
         /// <param name="gameTime"></param>
         public override void Update(GameTime gameTime)
         {
+            gameElapsedTime += (float) gameTime.ElapsedGameTime.TotalSeconds;
+
             if (HandleCardMovement()) return;
             HandleCardSelection();
 
@@ -430,6 +450,40 @@ namespace FreeCell
             Array.ForEach(freeCells, freeCell => freeCell.Draw(spriteBatch));
             Array.ForEach(foundationPiles, foundationPile => foundationPile.Draw(spriteBatch));
             Array.ForEach(tableauPiles, tableauPile => tableauPile.Draw(spriteBatch));
+
+            // Draw the UI
+            DrawUI();
+        }
+
+        /// <summary>
+        /// Draw the UI.
+        /// </summary>
+        private void DrawUI()
+        {
+            // spriteBatch.DrawLine applies uniform thickness to both vertical directions; therefore, we must offset the
+            // line by half of its thickness (or in our case, by the bar height).
+            const float lineY = TopUIBarHeight * 0.5f;
+
+            // Draw the top bar as a line
+            spriteBatch.DrawLine(new Vector2(0, lineY), new Vector2(MainGame.GameScreenWidth, lineY), UIBarColour, TopUIBarHeight);
+
+            // Draw the timer
+            string timerText = $"time {TimingHelper.ElapsedSecondsToTimerString(gameElapsedTime)}";
+            // Horizontally centre the text on the screen and centre it in the bar.
+            Vector2 timerStringSize = headerFont.MeasureString(timerText);
+            Vector2 timerTextPosition = (new Vector2(MainGame.GameScreenWidth, TopUIBarHeight) - timerStringSize) * 0.5f;
+
+            spriteBatch.DrawString(headerFont, timerText, timerTextPosition, Color.White);
+
+            // Draw the game number
+            string gameNumberText = $"Game #{GameSeed}";
+            Vector2 gameNumberStringSize = headerFont.MeasureString(gameNumberText);
+
+            // Centre the game number text vertically and align it to the right of the screen
+            Vector2 gameNumberTextPosition = new Vector2(MainGame.GameScreenWidth - gameNumberStringSize.X - TextScreenPadding, 
+                (TopUIBarHeight - gameNumberStringSize.Y) * 0.5f);
+
+            spriteBatch.DrawString(headerFont, gameNumberText, gameNumberTextPosition, Color.White);
         }
 
         /// <summary>
