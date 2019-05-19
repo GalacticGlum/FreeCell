@@ -34,7 +34,7 @@ namespace FreeCell
         /// <summary>
         /// The percent factor by which the <see cref="Card"/> compress in on one another in the <see cref="TableauPile"/>.
         /// </summary>
-        public const float PercentCardCompressionFactor = 0.02f;
+        public const float PercentCardCompressionFactor = 0.05f;
 
         /// <summary>
         /// Initializes a new <see cref="TableauPile"/>.
@@ -75,7 +75,7 @@ namespace FreeCell
         /// <summary>
         /// Calculate the rectangle information for this <see cref="TableauPile"/>.
         /// </summary>
-        private void CalculateCardRectangles()
+        public void CalculateCardRectangles()
         {
             float[] cardShifts = GetTableauPileCardLayout();
             float offsetY = 0;
@@ -125,14 +125,13 @@ namespace FreeCell
         /// <summary>
         /// Get the card layout for a <see cref="TableauPile"/>.
         /// </summary>
-        /// <param name="focusCardIndex">The index of the <see cref="Card"/> that is focused. Zero is the top of the <see cref="TableauPile"/>.</param>
         /// <returns>
         /// An array of integers where the i-th integer denotes the vertical shift, in pixels, of the i-th card; the 0-th elements
         /// represents the shift for the TOP-MOST card.
         /// </returns>
-        private float[] GetTableauPileCardLayout(int focusCardIndex = 0)
+        private float[] GetTableauPileCardLayout()
         {
-            // Choose an arbitrary card and g et its texture.
+            // Choose an arbitrary card and get its texture.
             float cardHeight = Card.GetTexture(CardSuit.Clubs, CardRank.Ace).Height;
             float pixelVisibility = cardHeight * PercentPixelVisibility;
 
@@ -144,7 +143,22 @@ namespace FreeCell
 
             int excess = Count - minimumCards;
             float compressionFactor = cardHeight * PercentCardCompressionFactor;
-            float compressionVisibility = Math.Max(pixelVisibility - excess * compressionFactor, minimumPixelVisibility);
+
+            // Check if one of the cards in this tableau pile IN the compressed group is selected
+            GameplayScreen gameplayScreen = MainGame.Context.GameScreenManager.Get<GameplayScreen>();
+            bool isCompressedSelected = false;
+            if (gameplayScreen.CurrentSelection != null)
+            {
+                for (int i = 0; i < Count; i++)
+                {
+                    if (gameplayScreen.CurrentSelection.Card != this[i]) continue;
+
+                    isCompressedSelected = i < CardCompressionGroupSize - 1;
+                    break;
+                }
+            }
+                
+            float compressionVisibility = isCompressedSelected ? pixelVisibility : Math.Max(pixelVisibility - excess * compressionFactor, minimumPixelVisibility);
 
             // Distribute the leftover space among the non-compressed cards.
             float leftoverVisibility = (Rectangle.Height - cardHeight - compressionVisibility * CardCompressionGroupSize) / (Count - CardCompressionGroupSize - 1);
@@ -160,7 +174,7 @@ namespace FreeCell
                 }
                 else
                 {
-                    allocations[i] = Count - 1 <= CardCompressionGroupSize ? compressionVisibility : leftoverVisibility;
+                    allocations[i] = Count - i <= CardCompressionGroupSize ? compressionVisibility : leftoverVisibility;
                 }
             }
 

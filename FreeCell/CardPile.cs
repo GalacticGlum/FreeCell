@@ -86,7 +86,7 @@ namespace FreeCell
         /// </returns>
         public bool Push(Card card, bool force = false)
         {
-            if (topIndex < MaximumSize)
+            if (topIndex + 1 < MaximumSize)
             {
                 if (!CanPush(card) && !force) return false;
                 data[++topIndex] = card;
@@ -97,7 +97,6 @@ namespace FreeCell
 
             Logger.LogFunctionEntry(string.Empty, "Attempted to push card onto full card pile.", LoggerVerbosity.Warning);
             return false;
-
         }
 
         /// <summary>

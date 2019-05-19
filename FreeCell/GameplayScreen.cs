@@ -223,7 +223,16 @@ namespace FreeCell
                 // If the card is null, we didn't click on this tableau pile.
                 if (card == null) continue;
 
+                TableauPile oldTableauPile = null;
+                if (CurrentSelection?.CardPile is TableauPile pile)
+                {
+                    oldTableauPile = pile;
+                }
+
                 CurrentSelection = new CardSelectionInformation(card, tableauPile);
+                oldTableauPile?.CalculateCardRectangles();
+                tableauPile.CalculateCardRectangles();
+
                 return;
             }
 
