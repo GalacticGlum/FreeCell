@@ -45,11 +45,37 @@ namespace FreeCell
         protected override bool CanPush(Card card) => Empty;
 
         /// <summary>
+        /// Update the <paramref name="newCard"/> when it is popped onto this <see cref="FreeCell"/>.
+        /// </summary>
+        protected override void OnPushed(Card newCard)
+        {
+            float offsetX = 0.5f * (freeCellTexture.Width - newCard.Texture.Width);
+            float offsetY = 0.5f * (freeCellTexture.Height - newCard.Texture.Height);
+
+            newCard.Rectangle = new RectangleF(Rectangle.Position + new Vector2(offsetX, offsetY), Rectangle.Size);
+        }
+
+        /// <summary>
         /// Draw this <see cref="FreeCell"/>.
         /// </summary>
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(freeCellTexture, Rectangle.Position, Color.White);
+
+            // Make sure that our free cell actually has a card on it.
+            if (!Empty && Value.Rectangle.HasValue)
+            {
+                GameplayScreen gameplayScreen = MainGame.Context.GameScreenManager.Get<GameplayScreen>();
+
+                // Determine whether the card should glow.
+                bool isSelected = false;
+                if (gameplayScreen.CurrentSelection != null)
+                {
+                    isSelected = gameplayScreen.CurrentSelection.Card == Value;
+                }
+
+                Value.Draw(spriteBatch, isGlowing: isSelected);
+            }
         }
     }
 }

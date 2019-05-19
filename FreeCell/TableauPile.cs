@@ -115,7 +115,6 @@ namespace FreeCell
 
                 // If this card is currently selected AND it is the top card, make it glow!
                 bool isGlowing = isSelected && j == Count - 1;
-
                 // The card is grayed out if it is not selected BUT this tableau pile IS selected.
                 bool isGrayedOut = !isSelected && gameplayScreen.CurrentSelection?.CardPile == this;
 

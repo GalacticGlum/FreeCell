@@ -204,6 +204,7 @@ namespace FreeCell
         /// <param name="gameTime"></param>
         public override void Update(GameTime gameTime)
         {
+            if (HandleCardMovement()) return;
             HandleCardSelection();
         }
 
@@ -226,17 +227,59 @@ namespace FreeCell
                 return;
             }
 
+            // If we have selected a non-top card in a tableau pile, clicking on an empty free cell
+            // or foundation pile shouldn't change the selection.
+            bool isMiddleTableauCard = CurrentSelection?.CardPile is TableauPile && CurrentSelection.Card != CurrentSelection.CardPile.Peek();
+
             // Check if we clicked on a free cell
             foreach (FreeCell freeCell in freeCells)
             {
-                if (!freeCell.Rectangle.Contains(Input.MousePosition) || freeCell.Empty) continue;
+                if (!freeCell.Rectangle.Contains(Input.MousePosition)) continue;
+                if (isMiddleTableauCard && freeCell.Empty) return;
+                if (!freeCell.Empty)
+                {
+                    CurrentSelection = new CardSelectionInformation(freeCell.Value, freeCell);
+                }
 
-                CurrentSelection = new CardSelectionInformation(freeCell.Value, freeCell);
                 return;
             }
-
+            
             // At this point, we are just clicking on an empty space.
             CurrentSelection = null;
+        }
+
+        /// <summary>
+        /// Handle card movement.
+        /// </summary>
+        /// <returns>A boolean indicating whether a card was successfully moved.</returns>
+        private bool HandleCardMovement()
+        {
+            // If we aren't selecting anything, there is no card to move.
+            if (!Input.GetMouseButtonDown(MouseButton.Left) || CurrentSelection == null) return false;
+
+            // Determine whether we clicked on a free cell
+            foreach (FreeCell freeCell in freeCells)
+            {
+                if (!freeCell.Rectangle.Contains(Input.MousePosition)) continue;
+
+                // If we are trying to move a card from the tableau pile to a free cell,
+                // we need to make sure that the card is on the top of the tableau pile.
+                if (CurrentSelection.CardPile is TableauPile &&
+                    CurrentSelection.Card != CurrentSelection.CardPile.Peek()) continue;
+
+                // If the free cell is empty, we can move the card onto it;
+                // otherwise, select the free cell as this was an invalid move.
+                if (freeCell.Empty)
+                {
+                    Card card = CurrentSelection.CardPile.Pop();
+                    freeCell.Push(card);
+
+                    CurrentSelection = null;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
