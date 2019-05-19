@@ -50,7 +50,7 @@ namespace FreeCell
         /// </summary>
         /// <param name="card">The <see cref="Card"/> to push onto this <see cref="TableauPile"/>.</param>
         /// <returns>A boolean value indicating whether the <see cref="Card"/> can be pushed.</returns>
-        protected override bool CanPush(Card card)
+        public override bool CanPush(Card card)
         {
             // Any card can be pushed on the tableau pile if it is empty.
             if (Empty) return true;
@@ -59,7 +59,7 @@ namespace FreeCell
 
             // A card can be moved onto the tableau pile if it is the opposite colour as 
             // the top card AND it is one less in rank than the top card.
-            return !card.IsRed == top.IsRed && (int) top.Rank == (int) card.Rank - 1;
+            return !card.IsRed == top.IsRed && (int) top.Rank - 1 == (int) card.Rank;
         }
 
         /// <summary>

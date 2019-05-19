@@ -45,7 +45,7 @@ namespace FreeCell
         /// </summary>
         /// <param name="card">The <see cref="Card"/> to push onto this <see cref="FoundationPile"/>.</param>
         /// <returns>A boolean value indicating whether the <see cref="Card"/> can be pushed.</returns>
-        protected override bool CanPush(Card card)
+        public override bool CanPush(Card card)
         {
             // The suit of the card must match the suit of the foundation piles.
             if (card.Suit != Suit) return false;

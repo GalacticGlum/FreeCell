@@ -42,7 +42,7 @@ namespace FreeCell
         /// </summary>
         /// <param name="card">The <see cref="Card"/> to be pushed.</param>
         /// <returns>A boolean value indicating whether the <see cref="Card"/> can be pushed onto this <see cref="FreeCell"/>.</returns>
-        protected override bool CanPush(Card card) => Empty;
+        public override bool CanPush(Card card) => Empty;
 
         /// <summary>
         /// Update the <paramref name="newCard"/> when it is popped onto this <see cref="FreeCell"/>.

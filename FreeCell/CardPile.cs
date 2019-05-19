@@ -10,6 +10,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
 using MonoGameUtilities;
 using MonoGameUtilities.Logging;
 
@@ -104,7 +105,7 @@ namespace FreeCell
         /// </summary>
         /// <param name="card">The <see cref="Card"/> to push.</param>
         /// <returns>A boolean value indicating whether the <see cref="Card"/> can be pushed.</returns>
-        protected virtual bool CanPush(Card card) => true;
+        public virtual bool CanPush(Card card) => true;
 
         /// <summary>
         /// Called when a <see cref="Card"/> is pushed onto this <see cref="CardPile"/>.
@@ -147,6 +148,13 @@ namespace FreeCell
         /// If the <see cref="CardPile"/> is empty, a value of <value>null</value> is returned.
         /// </returns>
         public Card Peek() => topIndex < 0 ? null : data[topIndex];
+
+        /// <summary>
+        /// Determines whether the specified <paramref name="point"/> is contained in this <see cref="CardPile"/>.
+        /// </summary>
+        /// <param name="point">The <see cref="Vector2"/> to check.</param>
+        /// <returns>A boolean value indicating whether the <paramref name="point"/> is contained in this <see cref="CardPile"/>.</returns>
+        public bool Contains(Vector2 point) => Rectangle.Contains(point);
 
         /// <summary>
         /// Retrieve the <see cref="IEnumerator{T}"/> for this <see cref="CardPile"/> which iterates over the stored <see cref="Card"/> collection.

@@ -227,14 +227,15 @@ namespace FreeCell
                 return;
             }
 
-            // If we have selected a non-top card in a tableau pile, clicking on an empty free cell
-            // or foundation pile shouldn't change the selection.
+            // A card is a "middle tableau" if it is not the top card.
             bool isMiddleTableauCardSelected = CurrentSelection?.CardPile is TableauPile && CurrentSelection.Card != CurrentSelection.CardPile.Peek();
 
             // Check if we clicked on a free cell
             foreach (FreeCell freeCell in freeCells)
             {
-                if (!freeCell.Rectangle.Contains(Input.MousePosition)) continue;
+                if (!freeCell.Contains(Input.MousePosition)) continue;
+
+                // If we have selected a non-top card in a tableau pile, clicking on an empty free cell shouldn't change the selection.
                 if (isMiddleTableauCardSelected && freeCell.Empty) return;
                 if (!freeCell.Empty)
                 {
@@ -244,11 +245,11 @@ namespace FreeCell
                 return;
             }
 
-            foreach (FoundationPile foundationPile in foundationPiles)
+            // If we have selected a non-top card in a tableau pile, clicking on a foundation pile shouldn't change the selection.
+            bool isSelectingFoundationPile = foundationPiles.Any(foundationPile => foundationPile.Contains(Input.MousePosition));
+            if (isSelectingFoundationPile && isMiddleTableauCardSelected)
             {
-                // Having a middle tableau card selected and clicking on a foundation pile
-                // shouldn't change the selection.
-                if (foundationPile.Rectangle.Contains(Input.MousePosition) && isMiddleTableauCardSelected) return;
+                return;
             }
             
             // At this point, we are just clicking on an empty space.
@@ -263,30 +264,30 @@ namespace FreeCell
         {
             // If we aren't selecting anything, there is no card to move.
             if (!Input.GetMouseButtonDown(MouseButton.Left) || CurrentSelection == null) return false;
+            return freeCells.Any(TryMoveCard) || tableauPiles.Any(TryMoveCard);
+        }
 
-            // Determine whether we clicked on a free cell
-            foreach (FreeCell freeCell in freeCells)
-            {
-                if (!freeCell.Rectangle.Contains(Input.MousePosition)) continue;
+        /// <summary>
+        /// Attempts to move a card onto the <paramref name="pile"/>.
+        /// </summary>
+        private bool TryMoveCard(CardPile pile)
+        {
+            if (CurrentSelection == null || !pile.Contains(Input.MousePosition)) return false;
 
-                // If we are trying to move a card from the tableau pile to a free cell,
-                // we need to make sure that the card is on the top of the tableau pile.
-                if (CurrentSelection.CardPile is TableauPile &&
-                    CurrentSelection.Card != CurrentSelection.CardPile.Peek()) continue;
+            // If we are trying to move a card from the tableau pile to
+            // another pile, we need to make sure that it is the top card
+            // that we are trying to move.
+            if (CurrentSelection.CardPile is TableauPile &&
+                CurrentSelection.Card != CurrentSelection.CardPile.Peek()) return false;
 
-                // If the free cell is empty, we can move the card onto it;
-                // otherwise, select the free cell as this was an invalid move.
-                if (freeCell.Empty)
-                {
-                    Card card = CurrentSelection.CardPile.Pop();
-                    freeCell.Push(card);
+            if (!pile.CanPush(CurrentSelection.Card)) return false;
 
-                    CurrentSelection = null;
-                    return true;
-                }
-            }
+            // If we can move the card onto the pile, move it and clear the selection
+            Card card = CurrentSelection.CardPile.Pop();
+            pile.Push(card);
 
-            return false;
+            CurrentSelection = null;
+            return true;
         }
 
         /// <summary>
