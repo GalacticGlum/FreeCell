@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGameUtilities;
 using Random = MonoGameUtilities.Random;
 
 namespace FreeCell
@@ -178,7 +179,9 @@ namespace FreeCell
             freeCells = new FreeCell[FreeCellPileCount];
             for (int i = 0; i < freeCells.Length; i++)
             {
-                freeCells[i] = new FreeCell();
+                // Free cells are placed from the left of the screen
+                float positionX = PileGroupHorizontalPadding + i * (freeCellTexture.Width + PileHorizontalSpacing);
+                freeCells[i] = new FreeCell(new RectangleF(positionX, PileGroupPositionY, freeCellTexture.Width, freeCellTexture.Height));
             }
 
             // Initialize the deck and tableau piles
@@ -215,9 +218,7 @@ namespace FreeCell
         {
             for (int i = 0; i < freeCells.Length; i++)
             {
-                // Free cells are placed from the left of the screen
-                float positionX = PileGroupHorizontalPadding + i * (freeCellTexture.Width + PileHorizontalSpacing);
-                spriteBatch.Draw(freeCellTexture, new Vector2(positionX, PileGroupPositionY), Color.White);
+                freeCells[i].Draw(spriteBatch);
             }
         }
 
@@ -332,7 +333,6 @@ namespace FreeCell
             {
                 // The bottom card has no shift since there is no card after it.
                 if (i == tableauPile.Count - 1) continue;
-
                 if (tableauPile.Count <= minimumCards)
                 {
                     allocations[i] = pixelVisibility;

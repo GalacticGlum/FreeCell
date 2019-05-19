@@ -505,6 +505,18 @@
 /processorParam:TextureFormat=Color
 /build:Cards/cardDiamondsQ.png
 
+#begin Cards/cardGlow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Cards/cardGlow.png
+
 #begin Cards/cardHearts10.png
 /importer:TextureImporter
 /processor:TextureProcessor
