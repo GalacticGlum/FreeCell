@@ -51,11 +51,22 @@ namespace FreeCell
             if (card.Suit != Suit) return false;
 
             // If our pile is empty, only an ace can be pushed onto the pile.
-            if (Empty && card.Rank == CardRank.Ace) return true;
+            if (Empty) return card.Rank == CardRank.Ace;
 
             // With a non-empty pile, only a card that is one bigger in rank than
             // the current top card can be pushed onto the pile.
             return (int) card.Rank == (int) Peek().Rank + 1;
+        }
+
+        /// <summary>
+        /// Update the <paramref name="newCard"/> when it is popped onto this <see cref="FoundationPile"/>.
+        /// </summary>
+        protected override void OnPushed(Card newCard)
+        {
+            float offsetX = 0.5f * (foundationPileTexture.Width - newCard.Texture.Width);
+            float offsetY = 0.5f * (foundationPileTexture.Height - newCard.Texture.Height);
+
+            newCard.Rectangle = new RectangleF(Rectangle.Position + new Vector2(offsetX, offsetY), Rectangle.Size);
         }
 
         /// <summary>
@@ -64,6 +75,11 @@ namespace FreeCell
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(foundationPileTexture, Rectangle.Position, Color.White);
+            if (!Empty)
+            {
+                // Draw the top card
+                Peek().Draw(spriteBatch);
+            }
         }
 
         /// <summary>

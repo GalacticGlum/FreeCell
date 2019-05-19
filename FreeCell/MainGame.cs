@@ -98,6 +98,8 @@ namespace FreeCell
             // We NEED to update input before we execute game logic
             // so that the gameplay does not lag by a frame (due to not synchronized input).
             Input.Update();
+            DoubleClickHelper.Update(gameTime);
+
             GameScreenManager.Update(gameTime);
         }
 

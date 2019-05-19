@@ -106,7 +106,7 @@ namespace FreeCell
         /// <summary>
         /// Initializes a new <see cref="GameplayScreen"/>.
         /// </summary>
-        public GameplayScreen() : this(Random.Range(Deck.MinimumGameSeed, Deck.MaximumGameSeed + 1)) { }
+        public GameplayScreen() : this(10) { }
 
         /// <summary>
         /// Initializes a new <see cref="GameplayScreen"/> with the specified <paramref name="gameSeed"/>.
@@ -262,17 +262,30 @@ namespace FreeCell
         /// <returns>A boolean indicating whether a card was successfully moved.</returns>
         private bool HandleCardMovement()
         {
+            // If we double click on a card, try to put it on the foundation pile.
+            if (DoubleClickHelper.HasDoubleClicked(MouseButton.Left) && foundationPiles.Any(pile => TryMoveCard(pile, true)))
+            {
+                return true;
+            }
+
             // If we aren't selecting anything, there is no card to move.
             if (!Input.GetMouseButtonDown(MouseButton.Left) || CurrentSelection == null) return false;
-            return freeCells.Any(TryMoveCard) || tableauPiles.Any(TryMoveCard);
+            return freeCells.Any(TryMoveCard) || tableauPiles.Any(TryMoveCard) || foundationPiles.Any(TryMoveCard);
         }
 
         /// <summary>
         /// Attempts to move a card onto the <paramref name="pile"/>.
         /// </summary>
-        private bool TryMoveCard(CardPile pile)
+        private bool TryMoveCard(CardPile pile) => TryMoveCard(pile, false);
+
+        /// <summary>
+        /// Attempts to move a card onto the <paramref name="pile"/>.
+        /// </summary>
+        /// <param name="pile">The <see cref="CardPile"/> to move the current selection to.</param>
+        /// <param name="ignoreMousePosition">Ignores whether the mouse is over the <paramref name="pile"/>.</param>
+        private bool TryMoveCard(CardPile pile, bool ignoreMousePosition)
         {
-            if (CurrentSelection == null || !pile.Contains(Input.MousePosition)) return false;
+            if (CurrentSelection == null || !pile.Contains(Input.MousePosition) && !ignoreMousePosition) return false;
 
             // If we are trying to move a card from the tableau pile to
             // another pile, we need to make sure that it is the top card
