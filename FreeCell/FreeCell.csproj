@@ -59,6 +59,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CardRandomEngine.cs" />
     <Compile Include="CardSelectionInformation.cs" />
+    <Compile Include="Queue.cs" />
     <Compile Include="TableauPile.cs" />
   </ItemGroup>
   <ItemGroup>

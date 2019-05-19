@@ -64,9 +64,9 @@ namespace FreeCell
         /// </summary>
         /// <param name="maximumSize">The maximum size of this <see cref="CardPile"/>.</param>
         /// <param name="rectangle">The bounding <see cref="RectangleF"/> of this <see cref="CardPile"/>.</param>
-        protected CardPile(uint maximumSize, RectangleF rectangle)
+        protected CardPile(int maximumSize, RectangleF rectangle)
         {
-            MaximumSize = (int) maximumSize;
+            MaximumSize = maximumSize;
             Rectangle = rectangle;
 
             data = new Card[maximumSize];

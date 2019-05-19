@@ -12,6 +12,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameUtilities;
+using MonoGameUtilities.Logging;
 using Random = MonoGameUtilities.Random;
 
 namespace FreeCell
@@ -117,8 +118,7 @@ namespace FreeCell
         /// </param>
         public GameplayScreen(int gameSeed)
         {
-            //GameSeed = gameSeed;
-            GameSeed = 10;
+            GameSeed = gameSeed;
         }
 
         public override void LoadContent(SpriteBatch spriteBatch)
@@ -307,7 +307,62 @@ namespace FreeCell
         {
             // If we aren't selecting anything, there is no card to move.
             if (!Input.GetMouseButtonDown(MouseButton.Left) || CurrentSelection == null) return false;
-            return freeCells.Any(TryMoveCard) || tableauPiles.Any(TryMoveCard) || foundationPiles.Any(TryMoveCard);
+            if (freeCells.Any(TryMoveCard) || foundationPiles.Any(TryMoveCard)) return true;
+
+            // If we are moving from tableau pile to tableau pile, treat all movements as
+            // moving a portion onto another tableau pile; otherwise, move the top card of the
+            // selected pile to the tableau pile.
+            if (CurrentSelection?.CardPile is TableauPile selectedTableauPile)
+            {
+                if (selectedTableauPile.SelectedPortion == null)
+                {
+                    // If our selection portion is null despite the fact that 
+                    // this tableau pile is selected, something has gone terribly
+                    // wrong so we should log this occurence.
+
+                    Logger.LogFunctionEntry(string.Empty, "NULL portion in selected tableau pile!", LoggerVerbosity.Warning);
+                    return false;
+                }
+
+                int maximumPortionLength = freeCells.Count(freeCell => freeCell.Empty) + 1;
+                foreach (TableauPile tableauPile in tableauPiles)
+                {
+                    if (!tableauPile.Contains(Input.MousePosition) || tableauPile == selectedTableauPile) continue;
+
+                    // If we have more cards than we can move, take the most that we can.
+                    int transferAmount = Math.Min(selectedTableauPile.SelectedPortion.Count, maximumPortionLength);
+
+                    // The index of the last card in the portion that we are taking
+                    int bottomPortionCardIndex = selectedTableauPile.Count - transferAmount;
+
+                    Logger.Log(selectedTableauPile[bottomPortionCardIndex]);
+
+                    // Make sure that we can move the portion (i.e. is it a valid move?)
+                    if (!tableauPile.CanPush(selectedTableauPile[bottomPortionCardIndex])) return false;
+                    
+                    // A temporary "stack" buffer to store the cards as we pop them from the tableau pile
+                    Card[] buffer = new Card[transferAmount];
+                    for (int i = 0; i < transferAmount; i++)
+                    {
+                        buffer[i] = selectedTableauPile.Pop();
+                    }
+
+                    // Push the cards onto the new tableau pile.
+                    for (int i = transferAmount - 1; i >= 0; i--)
+                    {
+                        tableauPile.Push(buffer[i]);
+                    }
+
+                    CurrentSelection = null;
+                    return true;
+                }
+            }
+            else
+            {
+                return tableauPiles.Any(TryMoveCard);
+            }
+
+            return false;
         }
 
         /// <summary>

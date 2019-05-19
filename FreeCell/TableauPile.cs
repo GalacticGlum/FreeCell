@@ -169,9 +169,6 @@ namespace FreeCell
                 bool isPileSelected = gameplayScreen.CurrentSelection?.CardPile == this;
                 bool isPortionCard = SelectedPortion != null && SelectedPortion.Contains(card) && isPileSelected;
 
-                // If this card is currently selected AND it is the top card, make it glow!
-                // bool isGlowing = isSelected && j == Count - 1;
-
                 // If this card is part of a portion that extends to the top of the pile, make it glow!
                 // (i.e. if the portion contains the top card, it extends to the top. This is guaranteed to work
                 // since a portion is a continuous subset of the pile.)
@@ -226,6 +223,7 @@ namespace FreeCell
 
             return portion;
         }
+
         /// <summary>
         /// Get the card layout for a <see cref="TableauPile"/>.
         /// </summary>
