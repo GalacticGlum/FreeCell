@@ -57,6 +57,11 @@ namespace FreeCell
         private static readonly Color SelectionBorderColour = new Color(0, 138, 255);
 
         /// <summary>
+        /// The tint applied to this <see cref="Card"/> when it is grayed out.
+        /// </summary>
+        private static readonly Color GrayedOutTintColour = new Color(200, 200, 200);
+
+        /// <summary>
         /// The <see cref="CardRank"/> of this <see cref="Card"/>.
         /// </summary>
         public CardRank Rank { get; }
@@ -99,7 +104,7 @@ namespace FreeCell
         /// <summary>
         /// Draws this <see cref="Card"/>.
         /// </summary>
-        public void Draw(SpriteBatch spriteBatch, float layerDepth = 0, bool isGlowing = false, float glowLayerDepth = 0)
+        public void Draw(SpriteBatch spriteBatch, float layerDepth = 0, bool isGlowing = false, float glowLayerDepth = 0, bool isGrayedOut = false)
         {
             // If the card has a null rectangle, something has gone terribly wrong.
             if (!Rectangle.HasValue)
@@ -108,7 +113,8 @@ namespace FreeCell
                 return;
             }
 
-            spriteBatch.Draw(Texture, Rectangle.Value.Position, null, Color.White, 0, Vector2.Zero, Vector2.One, SpriteEffects.None, layerDepth);
+            Color tint = isGrayedOut ? GrayedOutTintColour : Color.White;
+            spriteBatch.Draw(Texture, Rectangle.Value.Position, null, tint, 0, Vector2.Zero, Vector2.One, SpriteEffects.None, layerDepth);
 
             if (isGlowing)
             {

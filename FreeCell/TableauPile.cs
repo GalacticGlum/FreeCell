@@ -101,22 +101,25 @@ namespace FreeCell
         public void Draw(SpriteBatch spriteBatch)
         {
             GameplayScreen gameplayScreen = MainGame.Context.GameScreenManager.Get<GameplayScreen>();
-
             for (int j = 0; j < Count; j++)
             {
                 Card card = this[j];
-
                 float layerDepth = j / (float) (Count + 100);
 
                 // Determine whether the card should glow.
                 bool isSelected = false;
                 if (gameplayScreen.CurrentSelection != null)
                 {
-                    // If this card is currently selected AND it is the top card, make it glow!
-                    isSelected = gameplayScreen.CurrentSelection.Card == card && j == Count - 1;
+                    isSelected = gameplayScreen.CurrentSelection.Card == card;
                 }
-                
-                card.Draw(spriteBatch, layerDepth, isSelected, layerDepth + 0.01f);
+
+                // If this card is currently selected AND it is the top card, make it glow!
+                bool isGlowing = isSelected && j == Count - 1;
+
+                // The card is grayed out if it is not selected BUT this tableau pile IS selected.
+                bool isGrayedOut = !isSelected && gameplayScreen.CurrentSelection?.CardPile == this;
+
+                card.Draw(spriteBatch, layerDepth, isGlowing, layerDepth + 0.01f, isGrayedOut);
             }
         }
 
