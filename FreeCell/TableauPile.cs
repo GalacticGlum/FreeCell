@@ -12,6 +12,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameUtilities;
+using MonoGameUtilities.Logging;
 
 namespace FreeCell
 {
@@ -37,13 +38,21 @@ namespace FreeCell
         public const float PercentCardCompressionFactor = 0.05f;
 
         /// <summary>
+        /// The height, in pixels, of the tableau area available to cards.
+        /// </summary>
+        private readonly float fullAreaHeight;
+
+        /// <summary>
         /// Initializes a new <see cref="TableauPile"/>.
         /// <remarks>
         /// A <see cref="TableauPile"/> has a maximum size of 19; however, it is very rare
         /// for the full tableau pile to become full.
         /// </remarks>
         /// </summary>
-        public TableauPile(RectangleF rectangle) : base(19, rectangle) { }
+        public TableauPile(RectangleF rectangle, float areaHeight) : base(19, rectangle)
+        {
+            fullAreaHeight = areaHeight;
+        }
 
         /// <summary>
         /// Indicates whether the specified <see cref="Card"/> can be pushed on this <see cref="TableauPile"/>.
@@ -93,6 +102,32 @@ namespace FreeCell
 
                 card.Rectangle = new RectangleF(Rectangle.X, Rectangle.Y + offsetY, bounds.Width, bounds.Height);
             }
+
+            float height = fullAreaHeight;
+            if (Count > 0)
+            {
+                RectangleF? lastCardRectangle = this[Count - 1].Rectangle;
+                if (lastCardRectangle.HasValue)
+                {
+                    // Recalculate the tableau height
+                    height = lastCardRectangle.Value.Bottom - Rectangle.Y;
+                }
+                else
+                {
+                    // If the rectangle of the final card is null, something went terribly wrong!
+                    // (especially since we set the rectangles of the cards in the loop above).
+                    // Use the full area height for the calculation instead and log this occurence.
+
+                    Logger.LogFunctionEntry(string.Empty, "Rectangle of last card is null!", LoggerVerbosity.Warning);
+                }
+            }
+            else
+            {
+                // Choose an arbitrary card and get its height.
+                height = Card.GetTexture(CardSuit.Clubs, CardRank.Ace).Height;
+            }
+
+            Rectangle = new RectangleF(Rectangle.Position, new Vector2(Rectangle.Width, height));
         }
 
         /// <summary>
@@ -137,9 +172,9 @@ namespace FreeCell
 
             // The number of cards (including the first one) that can be fitted into the area without shrinking
             // the pixel visibility for a group of cards.
-            int minimumCards = (int)Math.Ceiling((Rectangle.Height - cardHeight) / pixelVisibility);
+            int minimumCards = (int)Math.Ceiling((fullAreaHeight - cardHeight) / pixelVisibility);
             // The minimum pixel visibility when trying to fit all the cards in the tableau pile.
-            float minimumPixelVisibility = (Rectangle.Height - cardHeight) / (MaximumSize - 1);
+            float minimumPixelVisibility = (fullAreaHeight - cardHeight) / (MaximumSize - 1);
 
             int excess = Count - minimumCards;
             float compressionFactor = cardHeight * PercentCardCompressionFactor;
@@ -161,7 +196,7 @@ namespace FreeCell
             float compressionVisibility = isCompressedSelected ? pixelVisibility : Math.Max(pixelVisibility - excess * compressionFactor, minimumPixelVisibility);
 
             // Distribute the leftover space among the non-compressed cards.
-            float leftoverVisibility = (Rectangle.Height - cardHeight - compressionVisibility * CardCompressionGroupSize) / (Count - CardCompressionGroupSize - 1);
+            float leftoverVisibility = (fullAreaHeight - cardHeight - compressionVisibility * CardCompressionGroupSize) / (Count - CardCompressionGroupSize - 1);
 
             float[] allocations = new float[Count];
             for (int i = 0; i < Count; i++)

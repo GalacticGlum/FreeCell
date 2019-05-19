@@ -46,7 +46,7 @@ namespace FreeCell
         /// <summary>
         /// The bounding <see cref="RectangleF"/> of this <see cref="CardPile"/>.
         /// </summary>
-        public RectangleF Rectangle { get; }
+        public RectangleF Rectangle { get; protected set; }
 
         /// <summary>
         /// The data of this <see cref="CardPile"/>.

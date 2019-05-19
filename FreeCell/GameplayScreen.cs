@@ -191,10 +191,9 @@ namespace FreeCell
             {
                 float positionX = centreOffsetX + i * (cardTextureWidth + TableauPileHorizontalSpacing);
 
-                // The height of the tableau pile, in pixels. "Window" height is so called since it
-                // refers to the area available for the cards.
+                // The height of the tableau card area, in pixels.
                 float height = MainGame.GameScreenHeight - tableauPilePositionY - TableauPileBottomPadding;
-                tableauPiles[i] = new TableauPile(new RectangleF(positionX, tableauPilePositionY, cardTextureWidth, height));
+                tableauPiles[i] = new TableauPile(new RectangleF(positionX, tableauPilePositionY, cardTextureWidth, height), height);
             }
         }
 
@@ -206,6 +205,12 @@ namespace FreeCell
         {
             if (HandleCardMovement()) return;
             HandleCardSelection();
+
+            // We call this after handling card movement and selection since this relies on double clicking 
+            // and it is possible for the user to register two clicks when they quickly switch selections;
+            // in this case, we don't want to move the card to the foundation pile so we need our selection
+            // to be updated beforehand.
+            HandleMoveToFoundationPile();
         }
 
         /// <summary>
@@ -271,12 +276,6 @@ namespace FreeCell
         /// <returns>A boolean indicating whether a card was successfully moved.</returns>
         private bool HandleCardMovement()
         {
-            // If we double click on a card, try to put it on the foundation pile.
-            if (DoubleClickHelper.HasDoubleClicked(MouseButton.Left) && foundationPiles.Any(pile => TryMoveCard(pile, true)))
-            {
-                return true;
-            }
-
             // If we aren't selecting anything, there is no card to move.
             if (!Input.GetMouseButtonDown(MouseButton.Left) || CurrentSelection == null) return false;
             return freeCells.Any(TryMoveCard) || tableauPiles.Any(TryMoveCard) || foundationPiles.Any(TryMoveCard);
@@ -310,6 +309,18 @@ namespace FreeCell
 
             CurrentSelection = null;
             return true;
+        }
+
+        /// <summary>
+        /// Handle moving the current selection to the foundation pile.
+        /// </summary>
+        private void HandleMoveToFoundationPile()
+        {
+            // If we double click on a card, try to put it on the foundation pile.
+            if (DoubleClickHelper.HasDoubleClicked(MouseButton.Left) && foundationPiles.Any(pile => TryMoveCard(pile, true)))
+            {
+                CurrentSelection = null;
+            }
         }
 
         /// <summary>
