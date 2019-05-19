@@ -73,7 +73,7 @@ namespace FreeCell
             graphics.ApplyChanges();
 
             IsMouseVisible = true;
-            Logger.Destination = LoggerDestination.File;
+            Logger.Destination = LoggerDestination.All;
         }
 
         /// <summary>

@@ -24,11 +24,6 @@ namespace FreeCell
         public CardSuit Suit { get; }
 
         /// <summary>
-        /// The <see cref="RectangleF"/> for this <see cref="FoundationPile"/>.
-        /// </summary>
-        public RectangleF Rectangle { get; }
-
-        /// <summary>
         /// A collection of all the <see cref="FoundationPile"/> textures mapped by <see cref="CardSuit"/>s.
         /// </summary>
         private readonly Texture2D foundationPileTexture;
@@ -39,10 +34,9 @@ namespace FreeCell
         /// A <see cref="FoundationPile"/> has a maximum size of 13: ace through king, one card each.
         /// </remarks>
         /// </summary>
-        public FoundationPile(CardSuit suit, RectangleF rectangle) : base(13)
+        public FoundationPile(CardSuit suit, RectangleF rectangle) : base(13, rectangle)
         {
             Suit = suit;
-            Rectangle = rectangle;
             foundationPileTexture = GetTexture(suit);
         }
 

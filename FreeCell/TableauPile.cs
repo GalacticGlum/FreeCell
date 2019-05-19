@@ -35,8 +35,6 @@ namespace FreeCell
         /// </summary>
         public const float PercentCardCompressionFactor = 0.02f;
 
-        public RectangleF Rectangle { get; }
-
         /// <summary>
         /// Initializes a new <see cref="TableauPile"/>.
         /// <remarks>
@@ -44,10 +42,7 @@ namespace FreeCell
         /// for the full tableau pile to become full.
         /// </remarks>
         /// </summary>
-        public TableauPile(RectangleF rectangle) : base(19)
-        {
-            Rectangle = rectangle;
-        }
+        public TableauPile(RectangleF rectangle) : base(19, rectangle) { }
 
         /// <summary>
         /// Indicates whether the specified <see cref="Card"/> can be pushed on this <see cref="TableauPile"/>.

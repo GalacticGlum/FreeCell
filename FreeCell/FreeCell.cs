@@ -24,11 +24,6 @@ namespace FreeCell
         public Card Value => Peek();
 
         /// <summary>
-        /// The <see cref="RectangleF"/> for this <see cref="FreeCell"/>.
-        /// </summary>
-        public RectangleF Rectangle { get; }
-
-        /// <summary>
         /// The texture of a <see cref="FreeCell"/> pile.
         /// </summary>
         private readonly Texture2D freeCellTexture;
@@ -36,9 +31,8 @@ namespace FreeCell
         /// <summary>
         /// Initializes a new <see cref="FreeCell"/>.
         /// </summary>
-        public FreeCell(RectangleF rectangle) : base(1)
+        public FreeCell(RectangleF rectangle) : base(1, rectangle)
         {
-            Rectangle = rectangle;
             freeCellTexture = MainGame.Context.Content.Load<Texture2D>("Cards/freeCell");
         }
 

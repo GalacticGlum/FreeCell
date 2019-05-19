@@ -12,6 +12,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameUtilities;
+using MonoGameUtilities.Logging;
 using Random = MonoGameUtilities.Random;
 
 namespace FreeCell
@@ -190,6 +191,51 @@ namespace FreeCell
         }
 
         /// <summary>
+        /// Update the gameplay.
+        /// </summary>
+        /// <param name="gameTime"></param>
+        public override void Update(GameTime gameTime)
+        {
+            HandleCardSelection();
+        }
+
+        /// <summary>
+        /// Handle the card selection input.
+        /// </summary>
+        private void HandleCardSelection()
+        {
+            if (!Input.GetMouseButtonDown(MouseButton.Left)) return;
+           
+            // Check if we clicked on a free cell
+            foreach (FreeCell freeCell in freeCells)
+            {
+                if (!freeCell.Rectangle.Contains(Input.MousePosition)) continue;
+
+                Logger.LogFunctionEntry(string.Empty, "Clicked on free cell!");
+                return;
+            }
+
+            // Check if we clicked on a foundation pile
+            foreach (FoundationPile foundationPile in foundationPiles)
+            {
+                if (!foundationPile.Rectangle.Contains(Input.MousePosition)) continue;
+
+                Logger.LogFunctionEntry(string.Empty, "Clicked on foundation pile!");
+                return;
+            }
+
+            // Check if we clicked on a foundation pile
+            foreach (TableauPile tableauPile in tableauPiles)
+            {
+                if (!tableauPile.Rectangle.Contains(Input.MousePosition)) continue;
+
+                Logger.LogFunctionEntry(string.Empty, "Clicked on tableau pile!");
+                return;
+            }
+
+        }
+
+        /// <summary>
         /// Draw the gameplay.
         /// </summary>
         public override void Draw(GameTime gameTime)
@@ -197,47 +243,15 @@ namespace FreeCell
             // Draw the background
             spriteBatch.Draw(tableTexture, Vector2.Zero, Color.White);
 
-            DrawFreeCells();
-            DrawFoundationPiles();
-            DrawTableauPiles();
-        }
-
-        /// <summary>
-        /// Draw the <see cref="FreeCell"/> piles.
-        /// </summary>
-        private void DrawFreeCells()
-        {
-            foreach (FreeCell freeCell in freeCells)
-            {
-                freeCell.Draw(spriteBatch);
-            }
-        }
-
-        /// <summary>
-        /// Draw the <see cref="FoundationPile"/>s.
-        /// </summary>
-        private void DrawFoundationPiles()
-        {
-            foreach (FoundationPile foundationPile in foundationPiles)
-            {
-                foundationPile.Draw(spriteBatch);
-            }
+            // Draw the free cell, foundation piles, and tableau piles.
+            Array.ForEach(freeCells, freeCell => freeCell.Draw(spriteBatch));
+            Array.ForEach(foundationPiles, foundationPile => foundationPile.Draw(spriteBatch));
+            Array.ForEach(tableauPiles, tableauPile => tableauPile.Draw(spriteBatch));
         }
 
         /// <summary>
         /// The starting vertical position, in pixels, of the <see cref="TableauPile"/>s.
         /// </summary>
         private float GetTableauPileStartPositionY() => PileGroupPositionY + freeCellTexture.Height + TableauPileVerticalPadding;
-
-        /// <summary>
-        /// Draw the <see cref="TableauPile"/>s.
-        /// </summary>
-        private void DrawTableauPiles()
-        {
-            foreach (TableauPile tableauPile in tableauPiles)
-            {
-                tableauPile.Draw(spriteBatch);
-            }
-        }
     }
 }

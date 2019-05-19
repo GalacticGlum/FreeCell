@@ -10,6 +10,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using MonoGameUtilities;
 using MonoGameUtilities.Logging;
 
 namespace FreeCell
@@ -42,6 +43,11 @@ namespace FreeCell
         public Card this[int index] => data[index];
 
         /// <summary>
+        /// The bounding <see cref="RectangleF"/> of this <see cref="CardPile"/>.
+        /// </summary>
+        public RectangleF Rectangle { get; }
+
+        /// <summary>
         /// The data of this <see cref="CardPile"/>.
         /// </summary>
         private readonly Card[] data;
@@ -55,9 +61,12 @@ namespace FreeCell
         /// Initializes a new <see cref="CardPile"/> with the specified <see cref="MaximumSize"/>.
         /// </summary>
         /// <param name="maximumSize">The maximum size of this <see cref="CardPile"/>.</param>
-        protected CardPile(uint maximumSize)
+        /// <param name="rectangle">The bounding <see cref="RectangleF"/> of this <see cref="CardPile"/>.</param>
+        protected CardPile(uint maximumSize, RectangleF rectangle)
         {
             MaximumSize = (int) maximumSize;
+            Rectangle = rectangle;
+
             data = new Card[maximumSize];
 
             topIndex = -1;
@@ -82,6 +91,7 @@ namespace FreeCell
                 data[++topIndex] = card;
 
                 OnPushed(card);
+                return true;
             }
 
             Logger.LogFunctionEntry(string.Empty, "Attempted to push card onto full card pile.", LoggerVerbosity.Warning);
