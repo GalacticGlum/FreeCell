@@ -166,13 +166,6 @@ namespace FreeCell
                 Card card = this[j];
                 float layerDepth = j / (float) (Count + 100);
 
-                // Determine whether the card should glow.
-                bool isSelected = false;
-                if (gameplayScreen.CurrentSelection != null)
-                {
-                    isSelected = gameplayScreen.CurrentSelection.Card == card;
-                }
-
                 bool isPileSelected = gameplayScreen.CurrentSelection?.CardPile == this;
                 bool isPortionCard = SelectedPortion != null && SelectedPortion.Contains(card) && isPileSelected;
 
