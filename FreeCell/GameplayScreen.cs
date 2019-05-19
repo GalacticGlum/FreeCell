@@ -229,19 +229,26 @@ namespace FreeCell
 
             // If we have selected a non-top card in a tableau pile, clicking on an empty free cell
             // or foundation pile shouldn't change the selection.
-            bool isMiddleTableauCard = CurrentSelection?.CardPile is TableauPile && CurrentSelection.Card != CurrentSelection.CardPile.Peek();
+            bool isMiddleTableauCardSelected = CurrentSelection?.CardPile is TableauPile && CurrentSelection.Card != CurrentSelection.CardPile.Peek();
 
             // Check if we clicked on a free cell
             foreach (FreeCell freeCell in freeCells)
             {
                 if (!freeCell.Rectangle.Contains(Input.MousePosition)) continue;
-                if (isMiddleTableauCard && freeCell.Empty) return;
+                if (isMiddleTableauCardSelected && freeCell.Empty) return;
                 if (!freeCell.Empty)
                 {
                     CurrentSelection = new CardSelectionInformation(freeCell.Value, freeCell);
                 }
 
                 return;
+            }
+
+            foreach (FoundationPile foundationPile in foundationPiles)
+            {
+                // Having a middle tableau card selected and clicking on a foundation pile
+                // shouldn't change the selection.
+                if (foundationPile.Rectangle.Contains(Input.MousePosition) && isMiddleTableauCardSelected) return;
             }
             
             // At this point, we are just clicking on an empty space.
