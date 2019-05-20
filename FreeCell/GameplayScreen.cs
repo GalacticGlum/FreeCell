@@ -11,9 +11,10 @@ using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using MonoGameUtilities;
 using MonoGameUtilities.Logging;
-using SpaceInvaders;
+using FreeCell;
 using Random = MonoGameUtilities.Random;
 
 namespace FreeCell
@@ -82,6 +83,11 @@ namespace FreeCell
         public const int TextScreenPadding = 20;
 
         /// <summary>
+        /// The vertical padding, in pixels, for a UI element.
+        /// </summary>
+        private const int UIElementPadding = 10;
+
+        /// <summary>
         /// The colour of the top ui bar.
         /// </summary>
         private static readonly Color UIBarColour = new Color(0, 0, 0, 0.4f);
@@ -114,6 +120,7 @@ namespace FreeCell
         /// </summary>
         private Texture2D freeCellTexture;
         private SpriteFont headerFont;
+        private SpriteFont buttonFont;
 
         private Deck deck;
         private FreeCell[] freeCells;
@@ -121,6 +128,10 @@ namespace FreeCell
         private TableauPile[] tableauPiles;
 
         private TextButton newGameButton;
+        private TextButton newGameConfirmButton;
+        private TextButton randomizeSeedButton;
+        private Textbox gameSeedTextbox;
+        private bool isNewGameModalActive;
 
         /// <summary>
         /// The elapsed time, in seconds, since the start of the game.
@@ -130,7 +141,7 @@ namespace FreeCell
         /// <summary>
         /// Initializes a new <see cref="GameplayScreen"/>.
         /// </summary>
-        public GameplayScreen() : this(Random.Range(Deck.MinimumGameSeed, Deck.MaximumGameSeed + 1)) { }
+        public GameplayScreen() : this(GenerateSeed()) { }
 
         /// <summary>
         /// Initializes a new <see cref="GameplayScreen"/> with the specified <paramref name="gameSeed"/>.
@@ -142,8 +153,7 @@ namespace FreeCell
         /// </param>
         public GameplayScreen(int gameSeed)
         {
-            //GameSeed = gameSeed;
-            GameSeed = 10;
+            GameSeed = gameSeed;
         }
 
         public override void LoadContent(SpriteBatch spriteBatch)
@@ -154,6 +164,7 @@ namespace FreeCell
             tableTexture = MainGame.Context.Content.Load<Texture2D>("Table");
             freeCellTexture = MainGame.Context.Content.Load<Texture2D>("Cards/freeCell");
             headerFont = MainGame.Context.Content.Load<SpriteFont>("Fonts/Arial_24");
+            buttonFont = MainGame.Context.Content.Load<SpriteFont>("Fonts/Arial_18");
 
             CardSuit[] cardSuits = Enum.GetValues(typeof(CardSuit)).Cast<CardSuit>().ToArray();
             foundationPiles = new FoundationPile[cardSuits.Length];
@@ -229,7 +240,12 @@ namespace FreeCell
         /// <param name="gameTime"></param>
         public override void Update(GameTime gameTime)
         {
-            UpdateUI();
+            float deltaTime = (float) gameTime.ElapsedGameTime.TotalSeconds;
+
+            UpdateUI(deltaTime);
+
+            // Halt gameplay logic while the modal is active
+            if (isNewGameModalActive) return;
 
             gameElapsedTime += (float) gameTime.ElapsedGameTime.TotalSeconds;
 
@@ -467,15 +483,29 @@ namespace FreeCell
         /// <summary>
         /// Update the UI.
         /// </summary>
-        private void UpdateUI()
+        private void UpdateUI(float deltaTime)
         {
-            newGameButton?.Update();
+            if (!isNewGameModalActive)
+            {
+                newGameButton?.Update();
+            }
+
+            UpdateNewGameModal(deltaTime);
         }
 
         /// <summary>
         /// Draw the UI.
         /// </summary>
         private void DrawUI()
+        {
+            DrawTopBar();
+            DrawNewGameModal();
+        }
+
+        /// <summary>
+        /// Draw the top UI bar.
+        /// </summary>
+        private void DrawTopBar()
         {
             // spriteBatch.DrawLine applies uniform thickness to both vertical directions; therefore, we must offset the
             // line by half of its thickness (or in our case, by the bar height).
@@ -498,7 +528,7 @@ namespace FreeCell
             Vector2 gameNumberStringSize = headerFont.MeasureString(gameNumberText);
 
             // Centre the game number text vertically and align it to the right of the screen
-            Vector2 gameNumberTextPosition = new Vector2(MainGame.GameScreenWidth - gameNumberStringSize.X - TextScreenPadding, 
+            Vector2 gameNumberTextPosition = new Vector2(MainGame.GameScreenWidth - gameNumberStringSize.X - TextScreenPadding,
                 (TopUIBarHeight - gameNumberStringSize.Y) * 0.5f);
 
             spriteBatch.DrawString(headerFont, gameNumberText, gameNumberTextPosition, Color.White);
@@ -515,14 +545,179 @@ namespace FreeCell
                     RegularTextColour = Color.White,
                     HoverTextColour = ButtonHoverColour
                 };
+
+                newGameButton.Clicked += OnNewGameButtonClicked;
             }
 
+            // Draw the button
             newGameButton?.Draw(spriteBatch);
+        }
+
+        /// <summary>
+        /// Update the new game modal.
+        /// </summary>
+        private void UpdateNewGameModal(float deltaTime)
+        {
+            if (!isNewGameModalActive) return;
+            if (Input.GetKeyDown(Keys.Escape))
+            {
+                isNewGameModalActive = false;
+            }
+
+            gameSeedTextbox?.Update(deltaTime);
+            newGameConfirmButton?.Update();
+            randomizeSeedButton?.Update();
+        }
+
+        /// <summary>
+        /// Draw the new game modal.
+        /// </summary>
+        private void DrawNewGameModal()
+        {
+            if (!isNewGameModalActive) return;
+
+            // Draw a tint over the whole screen
+            const float halfScreenHeight = MainGame.GameScreenHeight * 0.5f;
+
+            spriteBatch.DrawLine(new Vector2(0, halfScreenHeight), new Vector2(MainGame.GameScreenWidth, halfScreenHeight),
+                new Color(0, 0, 0, 0.8f), MainGame.GameScreenHeight);
+
+            const string headerText = "Enter Game #";
+
+            float headerTextPositionX = (MainGame.GameScreenWidth - headerFont.MeasureString(headerText).X) * 0.5f;
+            float headerTextPositionY = (MainGame.GameScreenHeight - headerFont.LineSpacing) * 0.5f - 100;
+
+            // Initialize the seed textbox
+            if (gameSeedTextbox == null)
+            {
+                gameSeedTextbox = new Textbox(Vector2.Zero, headerFont, 6, GenerateSeed().ToString())
+                {
+                    Colour = Color.White,
+                    Focused = true,
+                    NumbersOnly = true
+                };
+
+                // Place the textbox below the header.
+                float textboxX = (MainGame.GameScreenWidth - gameSeedTextbox.Rectangle.Width) * 0.5f;
+
+                // Add some padding between the header and textbox
+                float textboxY = headerTextPositionY + headerFont.LineSpacing + 3 * UIElementPadding;
+
+                gameSeedTextbox.Rectangle.Position = new Vector2(textboxX, textboxY);
+            }
+
+            // Initialize the randomize seed button
+            if (randomizeSeedButton == null)
+            {
+                const string randomizeButtonText = "Randomize";
+                randomizeSeedButton = new TextButton(Vector2.Zero, buttonFont, randomizeButtonText, new Vector2(0, 0.5f * TextScreenPadding))
+                {
+                    RegularTextColour = Color.White,
+                    HoverTextColour = Color.White,
+                    RegularBackgroundColour = new Color(0, 130, 135),
+                    HoverBackgroundColour = new Color(33, 146, 151)
+                };
+
+                // When the randomize button is clicked, simply update the game seed textbox
+                // with a new random seed.
+                randomizeSeedButton.Clicked += () => gameSeedTextbox.Text = GenerateSeed().ToString();
+
+                float randomizeButtonY = gameSeedTextbox.Rectangle.Bottom + 2 * UIElementPadding;
+                randomizeSeedButton.Rectangle.Position = new Vector2(0, randomizeButtonY);
+            }
+
+            // Initialize the play button
+            if (newGameConfirmButton == null)
+            {
+                // Make the play button stretch to the modal size
+                float innerPaddingX = 0.5f * (headerFont.MeasureString(headerText).X + UIElementPadding);
+                newGameConfirmButton = new TextButton(Vector2.Zero, buttonFont, "Play", new Vector2(innerPaddingX, 0.5f * TextScreenPadding))
+                {
+                    RegularTextColour = Color.Black,
+                    HoverTextColour = Color.Black,
+                    RegularBackgroundColour = new Color(203, 203, 203),
+                    HoverBackgroundColour = new Color(153, 153, 153)
+                };
+
+                float newGameConfirmButtonX = (MainGame.GameScreenWidth - newGameConfirmButton.Rectangle.Width) * 0.5f;
+                float newGameConfirmButtonY = randomizeSeedButton.Rectangle.Bottom + 2 * UIElementPadding;
+
+                newGameConfirmButton.Rectangle.Position = new Vector2(newGameConfirmButtonX, newGameConfirmButtonY);
+                newGameConfirmButton.Clicked += OnNewGame;
+            }
+
+            // Initialize the randomize button inner padding and positioning
+            if (randomizeSeedButton.InnerPadding.X == 0)
+            {
+                float randomizeButtonX = (MainGame.GameScreenWidth - newGameConfirmButton.Rectangle.Width) * 0.5f;
+                randomizeSeedButton.Rectangle.Position += new Vector2(randomizeButtonX, 0);
+
+                // Make the randomize button stretch to the play button size
+                float innerPaddingX = (newGameConfirmButton.Rectangle.Width - randomizeSeedButton.Rectangle.Width) * 0.5f;
+                randomizeSeedButton.InnerPadding = new Vector2(innerPaddingX, randomizeSeedButton.InnerPadding.Y);
+            }
+
+            // Draw the modal background
+            float modalWidth = newGameConfirmButton.Rectangle.Width + TextScreenPadding * 2;
+            float modalHeight = newGameConfirmButton.Rectangle.Bottom - headerTextPositionY + TextScreenPadding * 1.5f;
+
+            float modalX = (MainGame.GameScreenWidth - modalWidth) * 0.5f;
+            float modalY = headerTextPositionY - TextScreenPadding * 0.5f;
+            
+            // Offset by half the height to account for the bidirectional thickness that is applied.
+            float modalLineY = modalY + modalHeight * 0.5f;
+            spriteBatch.DrawLine(new Vector2(modalX, modalLineY), new Vector2(modalX + modalWidth, modalLineY), new Color(17, 55, 104), modalHeight);
+
+            // Draw the header background
+            float headerBackgroundHeight = headerFont.LineSpacing + UIElementPadding * 2;
+            float headerLineY = modalY + headerBackgroundHeight * 0.5f;
+
+            spriteBatch.DrawLine(new Vector2(modalX, headerLineY), new Vector2(modalX + modalWidth, headerLineY), new Color(37, 115, 236), headerBackgroundHeight);
+
+            // Draw the modal UI components
+            spriteBatch.DrawString(headerFont, headerText, new Vector2(headerTextPositionX, headerTextPositionY), Color.White);
+
+            gameSeedTextbox?.Draw(spriteBatch);
+            newGameConfirmButton?.Draw(spriteBatch);
+            randomizeSeedButton?.Draw(spriteBatch);
+        }
+
+        /// <summary>
+        /// Start a new game.
+        /// </summary>
+        private void OnNewGame()
+        {
+            int gameSeed = int.Parse(gameSeedTextbox.Text);
+
+            // If the game seed is out of bounds, we won't proceed with starting the new game
+            // Instead, focus on the game seed textbox.
+            if (gameSeed < Deck.MinimumGameSeed || gameSeed > Deck.MaximumGameSeed)
+            {
+                gameSeedTextbox.Focused = true;
+                return;
+            }
+
+            MainGame.Context.GameScreenManager.ReloadScreen<GameplayScreen>(gameSeed);
+        }
+
+        /// <summary>
+        /// Raised when the <see cref="newGameButton"/> is clicked.
+        /// </summary>
+        private void OnNewGameButtonClicked()
+        {
+            // Open up a modal window that lets you enter a game number/randomly generate one.
+            isNewGameModalActive = true;
         }
 
         /// <summary>
         /// The starting vertical position, in pixels, of the <see cref="TableauPile"/>s.
         /// </summary>
         private float GetTableauPileStartPositionY() => PileGroupPositionY + freeCellTexture.Height + TableauPileVerticalPadding;
+
+        /// <summary>
+        /// Generates a random game seed.
+        /// </summary>
+        /// <returns></returns>
+        private static int GenerateSeed() => Random.Range(Deck.MinimumGameSeed, Deck.MaximumGameSeed + 1);
     }
 }

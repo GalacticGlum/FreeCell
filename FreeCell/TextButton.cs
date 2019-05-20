@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameUtilities;
 
-namespace SpaceInvaders
+namespace FreeCell
 {
     /// <summary>
     /// A basic text-based button UI element.
@@ -28,11 +28,6 @@ namespace SpaceInvaders
         /// The <see cref="SpriteFont"/> to render this <see cref="TextButton"/>.
         /// </summary>
         public SpriteFont Font { get; }
-
-        /// <summary>
-        /// The inner padding between the text and background borders.
-        /// </summary>
-        public Vector2 InnerPadding { get; }
 
         /// <summary>
         /// The colour of the text when the mouse button is not hovering over this <see cref="TextButton"/>.
@@ -55,6 +50,21 @@ namespace SpaceInvaders
         public Color HoverBackgroundColour { get; set; } = Color.Transparent;
 
         /// <summary>
+        /// The inner padding between the text and background borders.
+        /// </summary>
+        public Vector2 InnerPadding
+        {
+            get => innerPadding;
+            set
+            {
+                if (innerPadding == value) return;
+
+                innerPadding = value;
+                UpdateRectangle();
+            }
+        }
+
+        /// <summary>
         /// The bounding rectangle of this <see cref="TextButton"/>.
         /// </summary>
         public RectangleF Rectangle;
@@ -67,6 +77,7 @@ namespace SpaceInvaders
 
         private Color currentTextColour;
         private Color currentBackgroundColour;
+        private Vector2 innerPadding;
 
         /// <summary>
         /// Initializes a new <see cref="TextButton"/>.
@@ -80,13 +91,22 @@ namespace SpaceInvaders
             Text = text;
             Font = font;
 
+            Rectangle.Position = position;
             InnerPadding = innerPadding.GetValueOrDefault(Vector2.Zero);
 
-            Vector2 size = new Vector2(Font.MeasureString(text).X + InnerPadding.X * 2, Font.LineSpacing + InnerPadding.Y * 2);
-            Rectangle = new RectangleF(position, size);
+            UpdateRectangle();
 
             currentTextColour = RegularTextColour;
             currentBackgroundColour = RegularBackgroundColour;
+        }
+
+        /// <summary>
+        /// Updates the bounding rectangle for this<see cref="TextButton"/>.
+        /// </summary>
+        private void UpdateRectangle()
+        {
+            Vector2 size = new Vector2(Font.MeasureString(Text).X + InnerPadding.X * 2, Font.LineSpacing + InnerPadding.Y * 2);
+            Rectangle = new RectangleF(Rectangle.Position, size);
         }
 
         /// <summary>

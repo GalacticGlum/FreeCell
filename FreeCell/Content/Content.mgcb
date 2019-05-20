@@ -901,6 +901,20 @@
 /processorParam:TextureFormat=Color
 /build:Cards/freeCell.png
 
+#begin Fonts/Arial_18.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/Arial_18.spritefont
+
+#begin Fonts/Arial_20.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/Arial_20.spritefont
+
 #begin Fonts/Arial_24.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
