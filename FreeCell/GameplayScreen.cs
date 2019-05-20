@@ -8,6 +8,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -206,7 +207,7 @@ namespace FreeCell
         /// A <value>null</value> value means that no card is being animated right now.
         /// </remarks>
         /// </summary>
-        private CardMovementAnimation cardMovementAnimation;
+        private List<CardMovementAnimation> cardMovementAnimations = new List<CardMovementAnimation>();
 
         /// <summary>
         /// Initializes a new <see cref="GameplayScreen"/>.
@@ -319,8 +320,8 @@ namespace FreeCell
         {
             float deltaTime = (float) gameTime.ElapsedGameTime.TotalSeconds;
 
-            cardMovementAnimation?.Update(deltaTime);
             UpdateUI(deltaTime);
+            UpdateAnimations(deltaTime);
 
             // Halt gameplay logic while the modal is active
             if (isNewGameModalActive) return;
@@ -328,7 +329,7 @@ namespace FreeCell
             gameElapsedTime += (float) gameTime.ElapsedGameTime.TotalSeconds;
 
             // If a card movement animation is currently active, disable card selection
-            if (cardMovementAnimation != null && !cardMovementAnimation.Finished) return;
+            if (cardMovementAnimations.Count > 0) return;
 
             if (HandleCardMovement())
             {
@@ -344,6 +345,24 @@ namespace FreeCell
             // in this case, we don't want to move the card to the foundation pile so we need our selection
             // to be updated beforehand.
             HandleMoveToFoundationPile();
+        }
+
+        /// <summary>
+        /// Updates the animations.
+        /// </summary>
+        private void UpdateAnimations(float deltaTime)
+        {
+            // Iterate from the back so that we can remove the animations
+            // that have finished.
+            for (int i = cardMovementAnimations.Count - 1; i >= 0; i--)
+            {
+                cardMovementAnimations[i].Update(deltaTime);
+                if (cardMovementAnimations[i].Finished)
+                {
+                    cardMovementAnimations.RemoveAt(i);
+                }
+            }
+
         }
 
         /// <summary>
@@ -468,7 +487,14 @@ namespace FreeCell
             if (!Input.GetMouseButtonDown(MouseButton.Left) || CurrentSelection == null) return false;
 
             if (freeCells.Any(TryMoveCard) || foundationPiles.Any(TryMoveCard)) return true;
+            return HandleTableuPileCardMovement();
+        }
 
+        /// <summary>
+        /// Handle card movement among tableau piles.
+        /// </summary>
+        private bool HandleTableuPileCardMovement()
+        {
             // If we are moving from tableau pile to tableau pile, treat all movements as
             // moving a portion onto another tableau pile; otherwise, move the top card of the
             // selected pile to the tableau pile.
@@ -480,7 +506,8 @@ namespace FreeCell
                     // this tableau pile is selected, something has gone terribly
                     // wrong so we should log this occurence.
 
-                    Logger.LogFunctionEntry(string.Empty, "NULL portion in selected tableau pile!", LoggerVerbosity.Warning);
+                    Logger.LogFunctionEntry(string.Empty, "NULL portion in selected tableau pile!",
+                        LoggerVerbosity.Warning);
                     return false;
                 }
 
@@ -509,7 +536,7 @@ namespace FreeCell
                     }
 
                     if (!canTransfer) return false;
-  
+
                     // A temporary "stack" buffer to store the cards as we pop them from the tableau pile
                     Card[] buffer = new Card[transferAmount];
                     for (int i = 0; i < transferAmount; i++)
@@ -562,7 +589,8 @@ namespace FreeCell
             LerpInformation<Vector2> animationLerp = new LerpInformation<Vector2>(card.Rectangle.GetValueOrDefault().Position,
                 pile.GetCardRectangle(card).Position, 0.15f, Vector2.Lerp);
 
-            cardMovementAnimation = new CardMovementAnimation(card, animationLerp, pile);
+            CardMovementAnimation cardMovementAnimation = new CardMovementAnimation(card, animationLerp, pile);
+            cardMovementAnimations.Add(cardMovementAnimation);
             CurrentSelection = null;
             return true;
         }
@@ -598,7 +626,7 @@ namespace FreeCell
             Array.ForEach(foundationPiles, foundationPile => foundationPile.Draw(spriteBatch));
             Array.ForEach(tableauPiles, tableauPile => tableauPile.Draw(spriteBatch));
 
-            cardMovementAnimation?.Draw(spriteBatch);
+            cardMovementAnimations.ForEach(animation => animation.Draw(spriteBatch));
 
             // Draw the UI
             DrawUI();
