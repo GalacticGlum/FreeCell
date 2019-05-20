@@ -850,6 +850,8 @@ namespace FreeCell
         /// </summary>
         private void OnNewGame()
         {
+            if (string.IsNullOrEmpty(gameSeedTextbox.Text)) return;
+
             int gameSeed = int.Parse(gameSeedTextbox.Text);
 
             // If the game seed is out of bounds, we won't proceed with starting the new game
