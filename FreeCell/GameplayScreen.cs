@@ -202,6 +202,12 @@ namespace FreeCell
         private float gameElapsedTime;
 
         /// <summary>
+        /// A boolean indicating whether the game is complete.
+        /// (i.e. all foundation piles are full).
+        /// </summary>
+        private bool isGameComplete;
+
+        /// <summary>
         /// Information about the current card movement animation.
         /// <remarks>
         /// A <value>null</value> value means that no card is being animated right now.
@@ -329,10 +335,15 @@ namespace FreeCell
             UpdateUI(deltaTime);
             UpdateAnimations(deltaTime);
 
+            isGameComplete = foundationPiles.All(foundationPile => foundationPile.Count == foundationPile.MaximumSize);
+
             // Halt gameplay logic while the modal is active
             if (isNewGameModalActive) return;
 
-            gameElapsedTime += (float) gameTime.ElapsedGameTime.TotalSeconds;
+            if (!isGameComplete)
+            {
+                gameElapsedTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
 
             // If a card movement animation is currently active, disable card selection
             if (cardMovementAnimations.Count > 0) return;
