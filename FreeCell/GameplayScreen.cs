@@ -285,6 +285,12 @@ namespace FreeCell
             {
                 tableauPiles[i % tableauPiles.Length].Push(deck[i], true);
             }
+
+            // Update each tableau pile rectangle.
+            foreach (TableauPile tableauPile in tableauPiles)
+            {
+                tableauPile.UpdateRectangles();
+            }
         }
 
         /// <summary>

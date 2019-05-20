@@ -81,11 +81,6 @@ namespace FreeCell
         }
 
         /// <summary>
-        /// Called when a <see cref="Card"/> is a pushed onto this <see cref="TableauPile"/>.
-        /// </summary>
-        protected override void OnPushed(Card newCard) => UpdateRectangles();
-
-        /// <summary>
         /// Called when a <see cref="Card"/> is popped onto this <see cref="TableauPile"/>.
         /// </summary>
         protected override void OnPopped(Card removedCard) => UpdateRectangles();
@@ -137,7 +132,7 @@ namespace FreeCell
         /// <summary>
         /// Update the positioning information of this <see cref="TableauPile"/>.
         /// </summary>
-        private void UpdateRectangles()
+        public void UpdateRectangles()
         {
             Card[] cards = this.ToArray();
             RectangleF[] newRectangles = CalculateCardRectangles(cards);
