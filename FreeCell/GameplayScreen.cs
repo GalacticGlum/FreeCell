@@ -207,7 +207,7 @@ namespace FreeCell
         /// A <value>null</value> value means that no card is being animated right now.
         /// </remarks>
         /// </summary>
-        private List<CardMovementAnimation> cardMovementAnimations = new List<CardMovementAnimation>();
+        private readonly List<CardMovementAnimation> cardMovementAnimations = new List<CardMovementAnimation>();
 
         /// <summary>
         /// Initializes a new <see cref="GameplayScreen"/>.
@@ -598,6 +598,12 @@ namespace FreeCell
             CardMovementAnimation cardMovementAnimation = new CardMovementAnimation(card, animationLerp, pile);
             cardMovementAnimations.Add(cardMovementAnimation);
             CurrentSelection = null;
+
+            if(pile is FoundationPile)
+            {
+                foundationPileAddSoundEffect.Play();
+            }
+
             return true;
         }
 
@@ -615,7 +621,6 @@ namespace FreeCell
             if (DoubleClickHelper.HasDoubleClicked(MouseButton.Left) && foundationPiles.Any(pile => TryMoveCard(pile, true)))
             {
                 CurrentSelection = null;
-                foundationPileAddSoundEffect.Play();
             }
         }
 
