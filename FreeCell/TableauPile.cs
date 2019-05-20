@@ -67,6 +67,9 @@ namespace FreeCell
         /// <returns>A boolean value indicating whether the <see cref="Card"/> can be pushed.</returns>
         public override bool CanPush(Card card)
         {
+            // We have already reached the maximum size.
+            if (Count == MaximumSize) return false;
+
             // Any card can be pushed on the tableau pile if it is empty.
             if (Empty) return true;
 

@@ -15,7 +15,6 @@ using Microsoft.Xna.Framework.Input;
 using MonoGameUtilities;
 using MonoGameUtilities.Logging;
 using Microsoft.Xna.Framework.Audio;
-using MathHelper = Microsoft.Xna.Framework.MathHelper;
 using Random = MonoGameUtilities.Random;
 
 namespace FreeCell
