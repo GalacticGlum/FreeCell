@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using MonoGameUtilities;
+using MonoGameUtilities.Logging;
 
 namespace FreeCell
 {
@@ -23,7 +24,7 @@ namespace FreeCell
         /// <summary>
         /// The time, in seconds, that multiple clicks can occur for them to be registered as consecutive clicks.
         /// </summary>
-        public static double ClickDelay { get; set; } = 0.5;
+        public static double ClickDelay { get; set; } = 0.8;
 
         /// <summary>
         /// A mapping of <see cref="MouseButton"/> to <see cref="int"/> representing how many times the <see cref="MouseButton"/> has been clicked
@@ -89,6 +90,7 @@ namespace FreeCell
                 else if (clicks[mouseButton] > 2 && dt > 1)
                 {
                     clicks[mouseButton] = 0;
+                    clickTimes[mouseButton] = 0;
                     states[mouseButton] = false;
                 }
             }
