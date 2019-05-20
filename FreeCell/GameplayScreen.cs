@@ -623,11 +623,6 @@ namespace FreeCell
         /// </summary>
         private void HandleMoveToFoundationPile()
         {
-            if (DoubleClickHelper.HasDoubleClicked(MouseButton.Left))
-            {
-                Logger.Log("Dbclick");
-            }
-
             // If we double click on a card, try to put it on the foundation pile.
             if (DoubleClickHelper.HasDoubleClicked(MouseButton.Left) && foundationPiles.Any(pile => TryMoveCard(pile, true)))
             {
