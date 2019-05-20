@@ -453,6 +453,7 @@ namespace FreeCell
             
             // At this point, we are just clicking on an empty space.
             CurrentSelection = null;
+            selectedTableauPile?.UpdateSelection(false);
         }
 
         /// <summary>
@@ -569,7 +570,10 @@ namespace FreeCell
         /// </summary>
         private void HandleMoveToFoundationPile()
         {
-            Logger.Log("Dbclick: " + DoubleClickHelper.HasDoubleClicked(MouseButton.Left));
+            if (DoubleClickHelper.HasDoubleClicked(MouseButton.Left))
+            {
+                Logger.Log("Dbclick");
+            }
 
             // If we double click on a card, try to put it on the foundation pile.
             if (DoubleClickHelper.HasDoubleClicked(MouseButton.Left) && foundationPiles.Any(pile => TryMoveCard(pile, true)))
@@ -664,7 +668,7 @@ namespace FreeCell
                     HoverTextColour = ButtonHoverColour
                 };
 
-                newGameButton.Clicked += OnNewGameButtonClicked;
+                newGameButton.Clicked += OnOpenModal;
             }
 
             // Draw the button
@@ -680,6 +684,11 @@ namespace FreeCell
             if (Input.GetKeyDown(Keys.Escape))
             {
                 isNewGameModalActive = false;
+            }
+
+            if (Input.GetKeyDown(Keys.Enter))
+            {
+                OnNewGame();
             }
 
             gameSeedTextbox?.Update(deltaTime);
@@ -821,7 +830,7 @@ namespace FreeCell
         /// <summary>
         /// Raised when the <see cref="newGameButton"/> is clicked.
         /// </summary>
-        private void OnNewGameButtonClicked()
+        private void OnOpenModal()
         {
             // Open up a modal window that lets you enter a game number/randomly generate one.
             isNewGameModalActive = true;

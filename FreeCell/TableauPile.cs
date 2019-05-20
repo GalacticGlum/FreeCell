@@ -101,7 +101,7 @@ namespace FreeCell
             }
             else
             {
-                SelectedPortion = null;
+                SelectedPortion.Clear();
             }
         }
 
@@ -175,11 +175,21 @@ namespace FreeCell
         /// </summary>
         public override RectangleF GetCardRectangle(Card card)
         {
-            //float offsetX = 0.5f * (freeCellTexture.Width - card.Texture.Width);
-            //float offsetY = 0.5f * (freeCellTexture.Height - card.Texture.Height);
+            // Create a new array containing all the cards
+            // so that we can use that to find the rectangle information.
+            Card[] cards = new Card[Count + 1];
+            for (int i = 0; i < Count; i++)
+            {
+                cards[i] = this[i];
+            }
 
-            //return new RectangleF(Rectangle.Position + new Vector2(offsetX, offsetY), Rectangle.Size);
-            return RectangleF.Empty;
+            cards[Count] = card;
+
+            // We need to compute all the rectangles to find
+            // the top rectangle since a cards position is impacted
+            // by everything around it.
+            RectangleF[] rectangles = CalculateCardRectangles(cards);
+            return rectangles[Count];
         }
 
         /// <summary>
