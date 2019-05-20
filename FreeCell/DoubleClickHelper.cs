@@ -24,7 +24,7 @@ namespace FreeCell
         /// <summary>
         /// The time, in seconds, that multiple clicks can occur for them to be registered as consecutive clicks.
         /// </summary>
-        public static double ClickDelay { get; set; } = 0.8;
+        public static double ClickDelay { get; set; } = 0.5;
 
         /// <summary>
         /// A mapping of <see cref="MouseButton"/> to <see cref="int"/> representing how many times the <see cref="MouseButton"/> has been clicked
@@ -68,11 +68,17 @@ namespace FreeCell
             IEnumerable<MouseButton> mouseButtons = Enum.GetValues(typeof(MouseButton)).Cast<MouseButton>();
             foreach (MouseButton mouseButton in mouseButtons)
             {
-                if (!Input.GetMouseButtonDown(mouseButton))
+                // Update the click states to ensure that there are no "rogue" clicks
+                // (i.e. if the user clicks once, and then waits a few seconds, and THEN double clicks).
+                double dt = gameTime.TotalGameTime.TotalSeconds - clickTimes[mouseButton];
+                if (clicks[mouseButton] == 1 && dt > ClickDelay)
                 {
-                    states[mouseButton] = false;
-                    return;
+                    clicks[mouseButton] = 0;
+                    clickTimes[mouseButton] = 0;
                 }
+
+                states[mouseButton] = false;
+                if (!Input.GetMouseButtonDown(mouseButton)) return;
 
                 clicks[mouseButton]++;
                 if (clicks[mouseButton] == 1)
@@ -80,7 +86,6 @@ namespace FreeCell
                     clickTimes[mouseButton] = gameTime.TotalGameTime.TotalSeconds;
                 }
 
-                double dt = gameTime.TotalGameTime.TotalSeconds - clickTimes[mouseButton];
                 if (clicks[mouseButton] > 1 &&  dt < ClickDelay)
                 {
                     clicks[mouseButton] = 0;
@@ -90,7 +95,6 @@ namespace FreeCell
                 else if (clicks[mouseButton] > 2 && dt > 1)
                 {
                     clicks[mouseButton] = 0;
-                    clickTimes[mouseButton] = 0;
                     states[mouseButton] = false;
                 }
             }
