@@ -464,10 +464,9 @@ namespace FreeCell
 
                 // If we have selected a non-top card in a tableau pile, clicking on an empty free cell shouldn't change the selection.
                 if (isMiddleTableauCardSelected && freeCell.Empty) return;
-                if (!freeCell.Empty)
-                {
-                    CurrentSelection = new CardSelectionInformation(freeCell.Value, freeCell);
-                }
+                if (freeCell.Empty) return;
+
+                CurrentSelection = new CardSelectionInformation(freeCell.Value, freeCell);
 
                 // Play if this is our first card selection
                 if (previousSelection == null)
