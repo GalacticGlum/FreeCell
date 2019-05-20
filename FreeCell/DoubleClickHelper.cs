@@ -67,11 +67,13 @@ namespace FreeCell
             IEnumerable<MouseButton> mouseButtons = Enum.GetValues(typeof(MouseButton)).Cast<MouseButton>();
             foreach (MouseButton mouseButton in mouseButtons)
             {
-                states[mouseButton] = false;
-                if (!Input.GetMouseButtonDown(mouseButton)) return;
+                if (!Input.GetMouseButtonDown(mouseButton))
+                {
+                    states[mouseButton] = false;
+                    return;
+                }
 
                 clicks[mouseButton]++;
-
                 if (clicks[mouseButton] == 1)
                 {
                     clickTimes[mouseButton] = gameTime.TotalGameTime.TotalSeconds;
@@ -87,6 +89,7 @@ namespace FreeCell
                 else if (clicks[mouseButton] > 2 && dt > 1)
                 {
                     clicks[mouseButton] = 0;
+                    states[mouseButton] = false;
                 }
             }
         }
