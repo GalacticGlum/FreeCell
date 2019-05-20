@@ -81,6 +81,11 @@ namespace FreeCell
         }
 
         /// <summary>
+        /// Called when a <see cref="Card"/> is a pushed onto this <see cref="TableauPile"/>.
+        /// </summary>
+        protected override void OnPushed(Card newCard) => UpdateRectangles();
+
+        /// <summary>
         /// Called when a <see cref="Card"/> is popped onto this <see cref="TableauPile"/>.
         /// </summary>
         protected override void OnPopped(Card removedCard) => UpdateRectangles();
