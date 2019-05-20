@@ -13,6 +13,30 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Audio/button_click_default.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/button_click_default.wav
+
+#begin Audio/card_move.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/card_move.wav
+
+#begin Audio/card_primary_select.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/card_primary_select.wav
+
+#begin Audio/card_secondary_select.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/card_secondary_select.wav
+
 #begin Cards/cardBack_blue1.png
 /importer:TextureImporter
 /processor:TextureProcessor

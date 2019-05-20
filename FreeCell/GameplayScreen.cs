@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameUtilities;
 using MonoGameUtilities.Logging;
-using FreeCell;
+using Microsoft.Xna.Framework.Audio;
 using Random = MonoGameUtilities.Random;
 
 namespace FreeCell
@@ -134,6 +134,21 @@ namespace FreeCell
         private bool isNewGameModalActive;
 
         /// <summary>
+        /// The sound effect that is played when a card is moved.
+        /// </summary>
+        private SoundEffect cardMoveSoundEffect;
+
+        /// <summary>
+        /// The primary selection sound effect.
+        /// </summary>
+        private SoundEffect cardSelectPrimarySoundEffect;
+
+        /// <summary>
+        /// The secondary selection sound effect.
+        /// </summary>
+        private SoundEffect cardSelectSecondarySoundEffect;
+
+        /// <summary>
         /// The elapsed time, in seconds, since the start of the game.
         /// </summary>
         private float gameElapsedTime;
@@ -165,6 +180,11 @@ namespace FreeCell
             freeCellTexture = MainGame.Context.Content.Load<Texture2D>("Cards/freeCell");
             headerFont = MainGame.Context.Content.Load<SpriteFont>("Fonts/Arial_24");
             buttonFont = MainGame.Context.Content.Load<SpriteFont>("Fonts/Arial_18");
+
+            // Load sound effects
+            cardMoveSoundEffect = MainGame.Context.Content.Load<SoundEffect>("Audio/card_move");
+            cardSelectPrimarySoundEffect = MainGame.Context.Content.Load<SoundEffect>("Audio/card_primary_select");
+            cardSelectSecondarySoundEffect = MainGame.Context.Content.Load<SoundEffect>("Audio/card_secondary_select");
 
             CardSuit[] cardSuits = Enum.GetValues(typeof(CardSuit)).Cast<CardSuit>().ToArray();
             foundationPiles = new FoundationPile[cardSuits.Length];
@@ -249,7 +269,13 @@ namespace FreeCell
 
             gameElapsedTime += (float) gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (HandleCardMovement()) return;
+            if (HandleCardMovement())
+            {
+                // Since we successfully moved a card, let's play the card movement sound effect
+                cardMoveSoundEffect.Play();
+                return;
+            }
+
             HandleCardSelection();
 
             // We call this after handling card movement and selection since this relies on double clicking 
@@ -287,7 +313,7 @@ namespace FreeCell
 
                 // If the card is null, we didn't click on this tableau pile.
                 if (card == null) continue;
- 
+
                 bool selectedPortionCard = false;
                 if (selectedTableauPile != null)
                 {
@@ -302,19 +328,31 @@ namespace FreeCell
                     CurrentSelection = null;
                     return;
                 }
-                
-                // If we were previously selecting a tableau pile, cache it
-                // so we can update it.
+
+   
+                // If we were previously selecting a tableau pile, cache it so we can update it.
                 TableauPile oldTableauPile = null;
                 if (CurrentSelection?.CardPile is TableauPile pile)
                 {
                     oldTableauPile = pile;
                 }
 
+                // Store our previous selection state so we can play the correct sound effect.
+                CardSelectionInformation previousSelection = CurrentSelection;
                 CurrentSelection = new CardSelectionInformation(card, tableauPile);
                 
                 oldTableauPile?.UpdateSelection(tableauPile == oldTableauPile);
                 tableauPile.UpdateSelection(true);
+
+                // Play the primary sound effect if we selected the top card AND if this is our first card selection
+                if (tableauPile.Peek() == card && previousSelection == null)
+                {
+                    cardSelectPrimarySoundEffect.Play();
+                }
+                else
+                {
+                    cardSelectSecondarySoundEffect.Play();
+                }
 
                 return;
             }
@@ -324,11 +362,24 @@ namespace FreeCell
             {
                 if (!freeCell.Contains(Input.MousePosition)) continue;
 
+                // Store our previous selection state so we can play the correct sound effect.
+                CardSelectionInformation previousSelection = CurrentSelection;
+
                 // If we have selected a non-top card in a tableau pile, clicking on an empty free cell shouldn't change the selection.
                 if (isMiddleTableauCardSelected && freeCell.Empty) return;
                 if (!freeCell.Empty)
                 {
                     CurrentSelection = new CardSelectionInformation(freeCell.Value, freeCell);
+                }
+
+                // Play if this is our first card selection
+                if (previousSelection == null)
+                {
+                    cardSelectPrimarySoundEffect.Play();
+                }
+                else
+                {
+                    cardSelectSecondarySoundEffect.Play();
                 }
 
                 return;

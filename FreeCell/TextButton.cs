@@ -9,6 +9,7 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameUtilities;
 
@@ -19,6 +20,11 @@ namespace FreeCell
     /// </summary>
     public class TextButton
     {
+        /// <summary>
+        /// The content path to the default click sound effect.
+        /// </summary>
+        private const string DefaultClickSoundEffectPath = "Audio/button_click_default";
+
         /// <summary>
         /// The text of this <see cref="TextButton"/>.
         /// </summary>
@@ -48,6 +54,11 @@ namespace FreeCell
         /// The colour of the background.
         /// </summary>
         public Color HoverBackgroundColour { get; set; } = Color.Transparent;
+
+        /// <summary>
+        /// The sound effect that is played when a user clicks this <see cref="TextButton"/>.
+        /// </summary>
+        public SoundEffect ClickSoundEffect { get; set; }
 
         /// <summary>
         /// The inner padding between the text and background borders.
@@ -98,6 +109,9 @@ namespace FreeCell
 
             currentTextColour = RegularTextColour;
             currentBackgroundColour = RegularBackgroundColour;
+
+            // Load the default click sound effect
+            ClickSoundEffect = MainGame.Context.Content.Load<SoundEffect>(DefaultClickSoundEffectPath);
         }
 
         /// <summary>
@@ -122,6 +136,7 @@ namespace FreeCell
                 if (Input.GetMouseButtonDown(MouseButton.Left))
                 {
                     Clicked?.Invoke();
+                    ClickSoundEffect?.Play();
                 }
             }
             else
