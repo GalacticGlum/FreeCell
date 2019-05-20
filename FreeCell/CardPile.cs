@@ -101,6 +101,11 @@ namespace FreeCell
         }
 
         /// <summary>
+        /// Gets the rectangle of the specified <paramref name="card"/> as if it were the top of this <see cref="CardPile"/>.
+        /// </summary>
+        public abstract RectangleF GetCardRectangle(Card card);
+
+        /// <summary>
         /// Indicates whether the specified <see cref="Card"/> can be pushed onto this <see cref="CardPile"/>.
         /// </summary>
         /// <param name="card">The <see cref="Card"/> to push.</param>
@@ -163,11 +168,10 @@ namespace FreeCell
         /// <returns>The index of the <paramref name="card"/> in this <see cref="CardPile"/> or <value>-1</value> if it could not be found.</returns>
         protected int GetIndexOf(Card card) => Array.IndexOf(data, card);
 
-
         /// <summary>
         /// Retrieve the <see cref="IEnumerator{T}"/> for this <see cref="CardPile"/> which iterates over the stored <see cref="Card"/> collection.
         /// </summary>
-        public IEnumerator<Card> GetEnumerator() => data.Take(topIndex).GetEnumerator();
+        public IEnumerator<Card> GetEnumerator() => data.Take(topIndex + 1).GetEnumerator();
 
         /// <summary>
         /// Retrieve the <see cref="IEnumerator{T}"/> for this <see cref="Deck"/> which iterates over the stored <see cref="Card"/> collection.

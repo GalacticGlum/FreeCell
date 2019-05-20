@@ -9,6 +9,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameUtilities;
@@ -79,12 +80,12 @@ namespace FreeCell
         /// <summary>
         /// Called when a <see cref="Card"/> is a pushed onto this <see cref="TableauPile"/>.
         /// </summary>
-        protected override void OnPushed(Card newCard) => CalculateCardRectangles();
+        protected override void OnPushed(Card newCard) => UpdateRectangles();
 
         /// <summary>
         /// Called when a <see cref="Card"/> is popped onto this <see cref="TableauPile"/>.
         /// </summary>
-        protected override void OnPopped(Card removedCard) => CalculateCardRectangles();
+        protected override void OnPopped(Card removedCard) => UpdateRectangles();
 
         /// <summary>
         /// Update this <see cref="TableauPile"/> after the selection has changed.
@@ -92,8 +93,7 @@ namespace FreeCell
         /// <param name="isSelected">A boolean indicating whether this <see cref="TableauPile"/> is currently selected.</param>
         public void UpdateSelection(bool isSelected)
         {
-            CalculateCardRectangles();
-
+            UpdateRectangles();
             if (isSelected)
             {
                 GameplayScreen gameplayScreen = MainGame.Context.GameScreenManager.Get<GameplayScreen>();
@@ -108,23 +108,39 @@ namespace FreeCell
         /// <summary>
         /// Calculate the rectangle information for this <see cref="TableauPile"/>.
         /// </summary>
-        private void CalculateCardRectangles()
+        private RectangleF[] CalculateCardRectangles(Card[] cards)
         {
-            float[] cardShifts = GetTableauPileCardLayout();
+            float[] cardShifts = GetTableauPileCardLayout(cards);
             float offsetY = 0;
 
-            for (int j = 0; j < Count; j++)
+            RectangleF[] rectangles = new RectangleF[cards.Length];
+            for (int i = 0; i < cards.Length; i++)
             {
                 // Use the reverse index for the card shift since
                 // the 0-th element represents the top-most card in the
                 // shift array whereas the 0-th element in the card pile
                 // is the bottom-most card.
-                offsetY += cardShifts[Count - j - 1];
+                offsetY += cardShifts[cards.Length - i - 1];
 
-                Card card = this[j];
+                Card card = cards[i];
                 Rectangle bounds = card.Texture.Bounds;
 
-                card.Rectangle = new RectangleF(Rectangle.X, Rectangle.Y + offsetY, bounds.Width, bounds.Height);
+                rectangles[i] = new RectangleF(Rectangle.X, Rectangle.Y + offsetY, bounds.Width, bounds.Height);
+            }
+
+            return rectangles;
+        }
+
+        /// <summary>
+        /// Update the positioning information of this <see cref="TableauPile"/>.
+        /// </summary>
+        private void UpdateRectangles()
+        {
+            Card[] cards = this.ToArray();
+            RectangleF[] newRectangles = CalculateCardRectangles(cards);
+            for (int i = 0; i < Count; i++)
+            {
+                this[i].Rectangle = newRectangles[i];
             }
 
             float height = fullAreaHeight;
@@ -152,6 +168,18 @@ namespace FreeCell
             }
 
             Rectangle = new RectangleF(Rectangle.Position, new Vector2(Rectangle.Width, height));
+        }
+
+        /// <summary>
+        /// Gets the rectangle of a <see cref="Card"/> as it were in this <see cref="TableauPile"/>.
+        /// </summary>
+        public override RectangleF GetCardRectangle(Card card)
+        {
+            //float offsetX = 0.5f * (freeCellTexture.Width - card.Texture.Width);
+            //float offsetY = 0.5f * (freeCellTexture.Height - card.Texture.Height);
+
+            //return new RectangleF(Rectangle.Position + new Vector2(offsetX, offsetY), Rectangle.Size);
+            return RectangleF.Empty;
         }
 
         /// <summary>
@@ -231,7 +259,7 @@ namespace FreeCell
         /// An array of integers where the i-th integer denotes the vertical shift, in pixels, of the i-th card; the 0-th elements
         /// represents the shift for the TOP-MOST card.
         /// </returns>
-        private float[] GetTableauPileCardLayout()
+        private float[] GetTableauPileCardLayout(Card[] cards)
         {
             // Choose an arbitrary card and get its texture.
             float cardHeight = Card.GetTexture(CardSuit.Clubs, CardRank.Ace).Height;
@@ -243,7 +271,7 @@ namespace FreeCell
             // The minimum pixel visibility when trying to fit all the cards in the tableau pile.
             float minimumPixelVisibility = (fullAreaHeight - cardHeight) / (MaximumSize - 1);
 
-            int excess = Count - minimumCards;
+            int excess = cards.Length - minimumCards;
             float compressionFactor = cardHeight * PercentCardCompressionFactor;
 
             // Check if one of the cards in this tableau pile IN the compressed group is selected
@@ -251,9 +279,9 @@ namespace FreeCell
             bool isCompressedSelected = false;
             if (gameplayScreen.CurrentSelection != null)
             {
-                for (int i = 0; i < Count; i++)
+                for (int i = 0; i < cards.Length; i++)
                 {
-                    if (gameplayScreen.CurrentSelection.Card != this[i]) continue;
+                    if (gameplayScreen.CurrentSelection.Card != cards[i]) continue;
 
                     isCompressedSelected = i < CardCompressionGroupSize - 1;
                     break;
@@ -265,18 +293,18 @@ namespace FreeCell
             // Distribute the leftover space among the non-compressed cards.
             float leftoverVisibility = (fullAreaHeight - cardHeight - compressionVisibility * CardCompressionGroupSize) / (Count - CardCompressionGroupSize - 1);
 
-            float[] allocations = new float[Count];
-            for (int i = 0; i < Count; i++)
+            float[] allocations = new float[cards.Length];
+            for (int i = 0; i < cards.Length; i++)
             {
                 // The bottom card has no shift since there is no card after it.
-                if (i == Count - 1) continue;
-                if (Count <= minimumCards)
+                if (i == cards.Length - 1) continue;
+                if (cards.Length <= minimumCards)
                 {
                     allocations[i] = pixelVisibility;
                 }
                 else
                 {
-                    allocations[i] = Count - i <= CardCompressionGroupSize ? compressionVisibility : leftoverVisibility;
+                    allocations[i] = cards.Length - i <= CardCompressionGroupSize ? compressionVisibility : leftoverVisibility;
                 }
             }
 

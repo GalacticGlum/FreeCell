@@ -44,6 +44,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Card.cs" />
+    <Compile Include="CardMovementAnimation.cs" />
     <Compile Include="CardPile.cs" />
     <Compile Include="CardRank.cs" />
     <Compile Include="CardSuit.cs" />
@@ -54,6 +55,7 @@
     <Compile Include="GameScreen.cs" />
     <Compile Include="GameScreenManager.cs" />
     <Compile Include="DoubleClickHelper.cs" />
+    <Compile Include="LerpInformation.cs" />
     <Compile Include="MainGame.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -37,6 +37,12 @@
 /processorParam:Quality=Best
 /build:Audio/card_secondary_select.wav
 
+#begin Audio/foundation_add.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/foundation_add.wav
+
 #begin Cards/cardBack_blue1.png
 /importer:TextureImporter
 /processor:TextureProcessor

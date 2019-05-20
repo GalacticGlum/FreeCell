@@ -59,14 +59,14 @@ namespace FreeCell
         }
 
         /// <summary>
-        /// Update the <paramref name="newCard"/> when it is popped onto this <see cref="FoundationPile"/>.
+        /// Gets the rectangle of a <see cref="Card"/> as it were in this <see cref="FoundationPile"/>.
         /// </summary>
-        protected override void OnPushed(Card newCard)
+        public override RectangleF GetCardRectangle(Card card)
         {
-            float offsetX = 0.5f * (foundationPileTexture.Width - newCard.Texture.Width);
-            float offsetY = 0.5f * (foundationPileTexture.Height - newCard.Texture.Height);
+            float offsetX = 0.5f * (foundationPileTexture.Width - card.Texture.Width);
+            float offsetY = 0.5f * (foundationPileTexture.Height - card.Texture.Height);
 
-            newCard.Rectangle = new RectangleF(Rectangle.Position + new Vector2(offsetX, offsetY), Rectangle.Size);
+            return new RectangleF(Rectangle.Position + new Vector2(offsetX, offsetY), Rectangle.Size);
         }
 
         /// <summary>

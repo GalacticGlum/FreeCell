@@ -15,6 +15,7 @@ using Microsoft.Xna.Framework.Input;
 using MonoGameUtilities;
 using MonoGameUtilities.Logging;
 using Microsoft.Xna.Framework.Audio;
+using MathHelper = Microsoft.Xna.Framework.MathHelper;
 using Random = MonoGameUtilities.Random;
 
 namespace FreeCell
@@ -119,18 +120,60 @@ namespace FreeCell
         /// The texture of a <see cref="FreeCell"/> pile.
         /// </summary>
         private Texture2D freeCellTexture;
+
+        /// <summary>
+        /// The header font (large font).
+        /// </summary>
         private SpriteFont headerFont;
+
+        /// <summary>
+        /// The button font (smaller font).
+        /// </summary>
         private SpriteFont buttonFont;
 
+        /// <summary>
+        /// The deck of cards.
+        /// </summary>
         private Deck deck;
+
+        /// <summary>
+        /// The free cell piles.
+        /// </summary>
         private FreeCell[] freeCells;
+
+        /// <summary>
+        /// The foundation piles.
+        /// </summary>
         private FoundationPile[] foundationPiles;
+
+        /// <summary>
+        /// The tableau piles.
+        /// </summary>
         private TableauPile[] tableauPiles;
 
+        /// <summary>
+        /// The new game button in the top bar.
+        /// </summary>
         private TextButton newGameButton;
+
+        /// <summary>
+        /// The "play" game button in the modal window.
+        /// </summary>
         private TextButton newGameConfirmButton;
+
+        /// <summary>
+        /// The randomize seed button in the modal window.
+        /// </summary>
         private TextButton randomizeSeedButton;
+
+        /// <summary>
+        /// The seed textbox in the modal window.
+        /// </summary>
         private Textbox gameSeedTextbox;
+        
+        /// <summary>
+        /// A boolean indicating whether the modal window is currently active.
+        /// </summary>
         private bool isNewGameModalActive;
 
         /// <summary>
@@ -149,14 +192,28 @@ namespace FreeCell
         private SoundEffect cardSelectSecondarySoundEffect;
 
         /// <summary>
+        /// The foundation pile card added sound effect.
+        /// </summary>
+        private SoundEffect foundationPileAddSoundEffect;
+
+        /// <summary>
         /// The elapsed time, in seconds, since the start of the game.
         /// </summary>
         private float gameElapsedTime;
 
         /// <summary>
+        /// Information about the current card movement animation.
+        /// <remarks>
+        /// A <value>null</value> value means that no card is being animated right now.
+        /// </remarks>
+        /// </summary>
+        private CardMovementAnimation cardMovementAnimation;
+
+        /// <summary>
         /// Initializes a new <see cref="GameplayScreen"/>.
         /// </summary>
         public GameplayScreen() : this(GenerateSeed()) { }
+
 
         /// <summary>
         /// Initializes a new <see cref="GameplayScreen"/> with the specified <paramref name="gameSeed"/>.
@@ -185,6 +242,7 @@ namespace FreeCell
             cardMoveSoundEffect = MainGame.Context.Content.Load<SoundEffect>("Audio/card_move");
             cardSelectPrimarySoundEffect = MainGame.Context.Content.Load<SoundEffect>("Audio/card_primary_select");
             cardSelectSecondarySoundEffect = MainGame.Context.Content.Load<SoundEffect>("Audio/card_secondary_select");
+            foundationPileAddSoundEffect = MainGame.Context.Content.Load<SoundEffect>("Audio/foundation_add");
 
             CardSuit[] cardSuits = Enum.GetValues(typeof(CardSuit)).Cast<CardSuit>().ToArray();
             foundationPiles = new FoundationPile[cardSuits.Length];
@@ -262,6 +320,7 @@ namespace FreeCell
         {
             float deltaTime = (float) gameTime.ElapsedGameTime.TotalSeconds;
 
+            cardMovementAnimation?.Update(deltaTime);
             UpdateUI(deltaTime);
 
             // Halt gameplay logic while the modal is active
@@ -404,6 +463,7 @@ namespace FreeCell
         {
             // If we aren't selecting anything, there is no card to move.
             if (!Input.GetMouseButtonDown(MouseButton.Left) || CurrentSelection == null) return false;
+
             if (freeCells.Any(TryMoveCard) || foundationPiles.Any(TryMoveCard)) return true;
 
             // If we are moving from tableau pile to tableau pile, treat all movements as
@@ -496,8 +556,10 @@ namespace FreeCell
 
             // If we can move the card onto the pile, move it and clear the selection
             Card card = CurrentSelection.CardPile.Pop();
-            pile.Push(card);
+            LerpInformation<Vector2> animationLerp = new LerpInformation<Vector2>(card.Rectangle.GetValueOrDefault().Position,
+                pile.GetCardRectangle(card).Position, 0.15f, Vector2.Lerp);
 
+            cardMovementAnimation = new CardMovementAnimation(card, animationLerp, pile);
             CurrentSelection = null;
             return true;
         }
@@ -507,10 +569,13 @@ namespace FreeCell
         /// </summary>
         private void HandleMoveToFoundationPile()
         {
+            Logger.Log("Dbclick: " + DoubleClickHelper.HasDoubleClicked(MouseButton.Left));
+
             // If we double click on a card, try to put it on the foundation pile.
             if (DoubleClickHelper.HasDoubleClicked(MouseButton.Left) && foundationPiles.Any(pile => TryMoveCard(pile, true)))
             {
                 CurrentSelection = null;
+                foundationPileAddSoundEffect.Play();
             }
         }
 
@@ -526,6 +591,8 @@ namespace FreeCell
             Array.ForEach(freeCells, freeCell => freeCell.Draw(spriteBatch));
             Array.ForEach(foundationPiles, foundationPile => foundationPile.Draw(spriteBatch));
             Array.ForEach(tableauPiles, tableauPile => tableauPile.Draw(spriteBatch));
+
+            cardMovementAnimation?.Draw(spriteBatch);
 
             // Draw the UI
             DrawUI();
