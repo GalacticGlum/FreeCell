@@ -35,6 +35,11 @@ namespace FreeCell
         public CardPile TargetPile { get; }
 
         /// <summary>
+        /// A boolean indicating whether this <see cref="CardMovementAnimation"/> is finished.
+        /// </summary>
+        public bool Finished => LerpInformation == null;
+
+        /// <summary>
         /// Initializes a new <see cref="CardMovementAnimation"/>.
         /// </summary>
         public CardMovementAnimation(Card card, LerpInformation<Vector2> lerpInformation, CardPile targetPile)

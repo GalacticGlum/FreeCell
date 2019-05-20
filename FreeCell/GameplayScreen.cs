@@ -328,6 +328,9 @@ namespace FreeCell
 
             gameElapsedTime += (float) gameTime.ElapsedGameTime.TotalSeconds;
 
+            // If a card movement animation is currently active, disable card selection
+            if (cardMovementAnimation != null && !cardMovementAnimation.Finished) return;
+
             if (HandleCardMovement())
             {
                 // Since we successfully moved a card, let's play the card movement sound effect
